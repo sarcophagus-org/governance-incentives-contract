@@ -1,17 +1,19 @@
 const { expect } = require("chai");
+const { ethers } = require("hardhat");
 
-describe('Collection', function(){
-  beforeEach(async function(){
-      [signer] = await ethers.getSigners();  
+describe('Collections Contract', function(){
+    beforeEach(async function(){
+        [signer] = await ethers.getSigners();  
 
-      Collection = await ethers.getContractFactory('Collection', signer);
+        Collection = await ethers.getContractFactory('Collection', signer);
 
-      collection = await Collection.deploy()
-  })
+        collection = await Collection.deploy()
+    })
 
-  describe('deploy', function() {
-      it('should set owner', async function() {
-          expect(await collection.owner()).to.equal(signer.address)
-      })
-  });
+    describe('deploy', function() {
+        it('should set owner', async function() {
+            expect(await collection.owner()).to.equal(signer.address)
+        })
+    })
+
 })
