@@ -6,7 +6,7 @@
       "contentHash": "b07e5a624f485f9c9221b7111fa39a0c",
       "sourceName": "contracts/Collection.sol",
       "solcConfig": {
-        "version": "0.8.9",
+        "version": "0.8.13",
         "settings": {
           "optimizer": {
             "enabled": false,
