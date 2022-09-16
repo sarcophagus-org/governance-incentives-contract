@@ -9,15 +9,13 @@ describe("Greeter", function () {
     beforeEach(async () => {
       const Collection = await ethers.getContractFactory("Collection");
       const [deployer] = await ethers.getSigners()
-      const contract = await Collection.connect(deployer).deploy();
-      
+      contract = await Collection.connect(deployer).deploy();
     });
   
     describe("deploy", () => {
       it("should set owner", async function () {
-        const collection = await contract.deployed();
         const [deployer] = await ethers.getSigners()
-        expect(await collection.owner()).to.equal(deployer.address)
+        expect(await contract.owner()).to.equal(deployer.address)
   
       });
     });
