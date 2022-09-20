@@ -36,29 +36,39 @@ contract Collection is Ownable {
         token.transferFrom(msg.sender, address(this), _amount);
     }
 
-    // TODO: array of addresses as input? can it be unbounded? maybe batch
-    function distribute(address _to, uint _shares) public onlyOwner {
-        _burn(msg.sender, _shares); //credit
-        _mint(_to, _shares); //debit
+    function getContractBalance() view public returns(uint){
+        balanceOf[address(this)] = token.balanceOf(address(this));
+        return(balanceOf[address(this)]);
+    }
+
+    function distribute(address[] memory _to, uint[] _shares) public onlyOwner {
+
+        getContractBalance();
+
+        for (uint i = 0; i < _to.length; i++) {
+            _debit(msg.sender, _shares[i]);
+            _credit(_to[i], _shares[i]);
+        }
     }
 
     function claim() public {
         require(balanceOf[msg.sender] > 0, "Claim unsuccessful: balance is 0");
         uint claimAmount = balanceOf[msg.sender];
-        _burn(msg.sender, claimAmount);
+        _debit(msg.sender, claimAmount);
         token.transferFrom(address(this), msg.sender, claimAmount);
     }
 
-    function withdraw() public onlyOwner {}
+    function withdraw() public onlyOwner {
+        _debit(msg.sender, balanceOf[msg.sender]);
+        token.transferFrom(address(this), msg.sender, balanceOf[msg.sender]);
+    }
 
-    function getBalance() view public returns(uint){}
-
-    function _mint(address _to, uint _shares) private {
+    function _credit(address _to, uint _shares) private {
         totalSupply += _shares;
         balanceOf[_to] += _shares;
     }
 
-    function _burn(address _from, uint _shares) private {
+    function _debit(address _from, uint _shares) private {
         totalSupply -= _shares;
         balanceOf[_from] -= _shares;
     }
