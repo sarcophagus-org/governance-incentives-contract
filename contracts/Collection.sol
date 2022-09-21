@@ -11,8 +11,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * via protocol fees, as well as the distribution of those fees.
  */
 
-//TODO: add events for transactions
-
 contract Collection is Ownable {
 
     uint public toBeClaimed;
@@ -67,8 +65,6 @@ contract Collection is Ownable {
     }
 
     function withdraw() public onlyOwner {
-        // testing: require( token.balanceOf(address(this)) == balanceOf[address(this)] , "Internal accounting error");
-        // testing: require(balanceOf[address(this)] == token.balanceOf(address(this)) - toBeClaimed, "Withdrawing unclaimed tokens");
         require( toBeDistributed > toBeClaimed, "Withdraw unsuccessful: all tokens are claimable by voters");
         uint withdrawAmount = toBeDistributed ;
         toBeDistributed = 0;
