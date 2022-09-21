@@ -11,12 +11,17 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * via protocol fees, as well as the distribution of those fees.
  */
 
+//TODO: add events for transactions
+
 contract Collection is Ownable {
 
-    uint public totalSupply;
-    uint public toBeDistributed;
     uint public toBeClaimed;
+    uint public toBeDistributed;
     mapping(address => uint) public balanceOf;
+
+    event Distribution(address[], uint[]);
+    event Claim(address, uint);
+    event Withdraw(address, uint);
 
     IERC20 public immutable token;
 
@@ -24,65 +29,51 @@ contract Collection is Ownable {
         token = IERC20(_token);
     }
 
-    function setContractBalance() internal {
+    /**
+     * @notice else{} represents the scenario where tokens have been transfered 
+     * to the Collections contract but have not yet beem claimed by voters
+     */
+
+    function setDistributionAmount() internal {
         if(toBeClaimed == 0) {
-            balanceOf[address(this)] = token.balanceOf(address(this));
+            toBeDistributed = token.balanceOf(address(this));
         } else {
-            // scenario where tokens have been transfered to the Collections contract but have not yet beem claimed by voters
-            balanceOf[address(this)] = token.balanceOf(address(this)) - toBeClaimed; 
+            toBeDistributed = token.balanceOf(address(this)) - toBeClaimed;
         }
     }
 
-    function distribute(address[] memory _to, uint[] memory _shares) public onlyOwner {
+    function distribute(address[] memory _to, uint[] memory _amount) public onlyOwner {
 
-        setContractBalance(); // this is the sum of toBeDistributed & toBeClaimed
+        setDistributionAmount();
  
-        // get left what needs to be distributed. at the beginning that will be 0
         for (uint i = 0; i < _to.length; i++) {
-            _debit(address(this), _shares[i]);
-            _credit(_to[i], _shares[i]);
-            toBeClaimed += _shares[i];
+            toBeDistributed -= _amount[i];
+            balanceOf[_to[i]] += _amount[i];
+            toBeClaimed += _amount[i];
         }
+
+        emit Distribution(_to, _amount);
     }
 
     function claim() public returns(uint) {
         require(balanceOf[msg.sender] > 0, "Claim unsuccessful: your balance is 0");
         uint claimAmount = balanceOf[msg.sender];
-        _debit(msg.sender, claimAmount);
+        balanceOf[msg.sender] = 0;
         toBeClaimed -= claimAmount;
         token.transferFrom(address(this), msg.sender, claimAmount);
+
+        emit Claim(msg.sender, claimAmount);
         return claimAmount;
     }
 
-    // check that the balance of the contract does not include unclaimed tokens
     function withdraw() public onlyOwner {
         // testing: require( token.balanceOf(address(this)) == balanceOf[address(this)] , "Internal accounting error");
-        require(balanceOf[address(this)] == token.balanceOf(address(this)) - toBeClaimed, "Withdrawing unclaimed tokens");
-        _debit(address(this), balanceOf[address(this)]);
-        token.transferFrom(address(this), msg.sender, balanceOf[address(this)]);
+        // testing: require(balanceOf[address(this)] == token.balanceOf(address(this)) - toBeClaimed, "Withdrawing unclaimed tokens");
+        require( toBeDistributed > toBeClaimed, "Withdraw unsuccessful: all tokens are claimable by voters");
+        uint withdrawAmount = toBeDistributed ;
+        toBeDistributed = 0;
+        token.transferFrom(address(this), msg.sender, withdrawAmount);
+
+        emit Withdraw(msg.sender, withdrawAmount);
     }
-
-    function _credit(address _to, uint _shares) private {
-        totalSupply += _shares;
-        balanceOf[_to] += _shares;
-    }
-
-    function _debit(address _from, uint _shares) private {
-        totalSupply -= _shares;
-        balanceOf[_from] -= _shares;
-    }
-
-    function deposit(uint _amount) public {
-        uint shares;
-        if (totalSupply == 0) {
-            totalSupply = _amount;
-        } else {
-            shares = (_amount * totalSupply) / token.balanceOf(address(this));
-        }
-
-        _credit(address(this), shares);
-
-        token.transferFrom(msg.sender, address(this), _amount);
-    }
-
 }
