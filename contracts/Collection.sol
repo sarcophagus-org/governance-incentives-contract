@@ -60,7 +60,7 @@ contract Collection is Ownable {
         uint claimAmount = balanceOf[msg.sender];
         balanceOf[msg.sender] = 0;
         toBeClaimed -= claimAmount;
-        token.transferFrom(address(this), msg.sender, claimAmount);
+        token.transfer(msg.sender, claimAmount);
 
         emit Claim(msg.sender, claimAmount);
         return claimAmount;
@@ -72,7 +72,7 @@ contract Collection is Ownable {
         require( toBeDistributed > toBeClaimed, "Withdraw unsuccessful: all tokens are claimable by voters");
         uint withdrawAmount = toBeDistributed ;
         toBeDistributed = 0;
-        token.transferFrom(address(this), msg.sender, withdrawAmount);
+        token.transfer(msg.sender, withdrawAmount);
 
         emit Withdraw(msg.sender, withdrawAmount);
     }

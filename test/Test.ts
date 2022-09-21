@@ -20,6 +20,7 @@ describe("Collection Contract", function () {
       ])
     });
 
+    // wrap this in a describe
     it("Should run a simple scenario", async function () {
         
       expect(await sarco.balanceOf(collection.address)).to.equal(ethers.utils.parseEther('1000'))
@@ -28,22 +29,26 @@ describe("Collection Contract", function () {
       let voters = [voter1.address, voter2.address, voter3.address]
       let amounts = [ethers.utils.parseEther('10'), ethers.utils.parseEther('10'), ethers.utils.parseEther('10')]
 
-      await collection.distribute(voters, amounts) //onlyOwner not working
+      await collection.connect(voter1).distribute(voters, amounts) //voter1 is the owner
       expect(await collection.balanceOf(voter1.address)).to.equal(ethers.utils.parseEther('10').toString())
       expect(await collection.balanceOf(voter2.address)).to.equal(ethers.utils.parseEther('10').toString())
       expect(await collection.balanceOf(voter3.address)).to.equal(ethers.utils.parseEther('10').toString())
       expect(await collection.toBeClaimed()).to.equal(ethers.utils.parseEther('30').toString())
 
-      //collection.address is not a signer
-      await sarco.connect(collection.address).approve(voter1.address, ethers.utils.parseEther('100'))
-      console.log("claim start")
-      console.log(await sarco.allowance(collection.address, voter1.address))
-      // await collection.connect(voter1).claim()
-      // expect(await sarco.balanceOf(voter1.address)).to.equal(ethers.utils.parseEther('10'))
+
+      const balanceVoter1Before = await sarco.balanceOf(voter1.address)
+      const balanceVoter2Before = await sarco.balanceOf(voter2.address)
+      const balanceVoter3Before = await sarco.balanceOf(voter3.address)
+      await collection.connect(voter1).claim()
+      await collection.connect(voter2).claim()
+      await collection.connect(voter3).claim()
       
+      expect(await sarco.balanceOf(voter1.address)).to.equal(balanceVoter1Before.add(ethers.utils.parseEther('10')))
+      expect(await sarco.balanceOf(voter2.address)).to.equal(balanceVoter2Before.add(ethers.utils.parseEther('10')))
+      expect(await sarco.balanceOf(voter3.address)).to.equal(balanceVoter3Before.add(ethers.utils.parseEther('10')))
 
-
-
+      await collection.connect(voter1).withdraw()
+      expect(await sarco.balanceOf(voter1.address)).to.equal("99999980000000000000000000")
     });
 
 
