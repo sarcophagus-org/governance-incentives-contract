@@ -21,8 +21,8 @@ describe("Collections Contract", function () {
       const Collection = await ethers.getContractFactory("Collection");
       [sarcoDao, tokenOwner, voter1, voter2] = await ethers.getSigners()
 
-      sarco = await Sarco.deploy(tokenOwner.address);
-      collection = await Collection.deploy(sarco.address);
+      sarco = await Sarco.connect(tokenOwner).deploy(tokenOwner.address);
+      collection = await Collection.connect(sarcoDao).deploy(sarco.address);
 
       await sarco.connect(tokenOwner).transfer(collection.address, ethers.utils.parseEther('100'))
     });
@@ -37,7 +37,7 @@ describe("Collections Contract", function () {
 
     describe("Distribution", () => {
 
-      it("should start with a balance of 100 SARCO", async () => {
+      it("should initiate contract with a balance of 100 SARCO", async () => {
         expect(await sarco.balanceOf(collection.address)).to.equal(ethers.utils.parseEther('100'))
       })
 
@@ -62,13 +62,17 @@ describe("Collections Contract", function () {
         let amounts = [amount, amount, amount]
   
         await expect(collection.connect(sarcoDao).distribute(voters, amounts)).to.be.revertedWith('Arguments array length not equal');
+      
+        voters = [voter1.address, voter2.address, voter2.address]
+        amounts = [amount, amount]
+        await expect(collection.connect(sarcoDao).distribute(voters, amounts)).to.be.revertedWith('Arguments array length not equal');
       })
 
-      it("toBeClaimed should be sum of individual amounts distributed", async () => {
+      it("toBeClaimed should be sum of individual amounts distributed to voters", async () => {
         let amount = ethers.utils.parseEther('10')
         let amounts = [amount, amount]
-        let sum = BigNumber.from(0);
         await distribute()
+        let sum = BigNumber.from(0);
         for (const i in amounts) {
           console.log(amounts[i].toString())
           sum.add(amounts[i]);
@@ -78,57 +82,79 @@ describe("Collections Contract", function () {
         expect(await collection.toBeClaimed()).to.equal(ethers.utils.parseEther('20').toString())
       })
 
+      it("should update toBeDistributed when contract receives additional tokens, by netting the toBeClaimed amount from the contract's token balance", async () => {
 
-      // check if toBeClaimed is the sum of the individual amounts       expect(await collection.toBeClaimed()).to.equal(ethers.utils.parseEther('30').toString())
-      // check if additional transfer is made to the contract if toBeDistributed is correct
+        await distribute()
+        await sarco.connect(tokenOwner).transfer(collection.address, ethers.utils.parseEther('100'))        
+        await distribute()
+        expect(await collection.toBeDistributed()).to.equal(ethers.utils.parseEther('160').toString())
+      })
+    })
 
+    describe("Claim", () => {
+
+      it("should result in each voter having the claimed Sarco in their balance", async () => {
+        await distribute()
+        let amount = ethers.utils.parseEther('10')
+        const balanceVoter1Before = await sarco.balanceOf(voter1.address)
+        const balanceVoter2Before = await sarco.balanceOf(voter2.address)
+        
+        await collection.connect(voter1).claim()
+        await collection.connect(voter2).claim()
+
+        expect(await sarco.balanceOf(voter1.address)).to.equal(balanceVoter1Before.add(amount))
+        expect(await sarco.balanceOf(voter2.address)).to.equal(balanceVoter2Before.add(amount))
+      })
+
+      it("should set to 0 the balance of the voters in the collection contract", async () => {
+        await distribute()
+        let amount = ethers.utils.parseEther('10')
+        const balanceVoter1Before = await sarco.balanceOf(voter1.address)
+        const balanceVoter2Before = await sarco.balanceOf(voter2.address)
+        
+        await collection.connect(voter1).claim()
+        await collection.connect(voter2).claim()
+
+        expect(await collection.balanceOf(voter1.address)).to.equal(BigNumber.from(0))
+        expect(await collection.balanceOf(voter1.address)).to.equal(BigNumber.from(0))
+      })
+
+      it("should fail if balance of voter is 0", async () => {
+        await distribute()
+
+        await collection.connect(voter1).claim()
+
+        await expect(collection.connect(voter1).claim()).to.be.revertedWith('Claim unsuccessful: your balance is 0');
+      })
+
+      it("should reset toBeClaimed once all amounts have been claimed by voters", async () => {
+        await distribute()
+        await collection.connect(voter1).claim()
+        await collection.connect(voter2).claim()
+
+        expect(await collection.toBeClaimed()).to.equal(BigNumber.from(0))
+      })
+    })
+
+    describe("Dao Withdraw", () => {
+
+      it("should withdraw correct amount", async () => {
+        await distribute()
+        await collection.connect(voter1).claim()
+        await collection.connect(voter2).claim()
+
+        const balanceCollectionsBefore = await sarco.balanceOf(collection.address)
+
+        await collection.connect(sarcoDao).withdraw()
+
+        expect(await sarco.balanceOf(sarcoDao.address)).to.equal(balanceCollectionsBefore)
+      })
+
+
+        // onlyOwner: should reject if connect other address 
+        // reject if toBeClaimed is equal to toBeDistributed         
 
 
     })
-
-
-
-
-
-    // wrap this in a describe
-    it.skip("Should run a simple scenario", async function () {
-        
-      expect(await sarco.balanceOf(collection.address)).to.equal(ethers.utils.parseEther('1000'))
-      const [sarcoDao, voter1, voter2, voter3] = await ethers.getSigners()
-
-      let voters = [voter1.address, voter2.address, voter3.address]
-      let amounts = [ethers.utils.parseEther('10'), ethers.utils.parseEther('10'), ethers.utils.parseEther('10')]
-
-      await collection.connect(sarcoDao).distribute(voters, amounts)
-      // onlyOwner: should reject if connect other address 
-      // check if length of arrays is the same
-      // check if toBeClaimed is the sum of the individual amounts
-      // check if additional transfer is made to the contract if toBeDistributed is correct
-
-      expect(await collection.balanceOf(voter1.address)).to.equal(ethers.utils.parseEther('10').toString())
-      expect(await collection.balanceOf(voter2.address)).to.equal(ethers.utils.parseEther('10').toString())
-      expect(await collection.balanceOf(voter3.address)).to.equal(ethers.utils.parseEther('10').toString())
-      expect(await collection.toBeClaimed()).to.equal(ethers.utils.parseEther('30').toString())
-
-
-      const balanceVoter1Before = await sarco.balanceOf(voter1.address)
-      const balanceVoter2Before = await sarco.balanceOf(voter2.address)
-      const balanceVoter3Before = await sarco.balanceOf(voter3.address)
-      await collection.connect(voter1).claim()
-      await collection.connect(voter2).claim()
-      await collection.connect(voter3).claim()
-      // claim  fail when balance is 0
-      // toBeClaimed is 0
-      
-      expect(await sarco.balanceOf(voter1.address)).to.equal(balanceVoter1Before.add(ethers.utils.parseEther('10')))
-      expect(await sarco.balanceOf(voter2.address)).to.equal(balanceVoter2Before.add(ethers.utils.parseEther('10')))
-      expect(await sarco.balanceOf(voter3.address)).to.equal(balanceVoter3Before.add(ethers.utils.parseEther('10')))
-
-      const balanceSarcoDaoBefore = await sarco.balanceOf(sarcoDao.address)
-      await collection.connect(sarcoDao).withdraw()
-      // onlyOwner: should reject if connect other address 
-      // reject if toBeClaimed is equal to toBeDistributed         
-      expect(await sarco.balanceOf(sarcoDao.address)).to.equal(ethers.utils.parseEther('970').add(balanceSarcoDaoBefore))
-    });
 
   });
