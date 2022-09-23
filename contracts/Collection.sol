@@ -65,7 +65,7 @@ contract Collection is Ownable {
     }
 
     function withdraw() public onlyOwner {
-        require( toBeDistributed > toBeClaimed, "Withdraw unsuccessful: all tokens are claimable by voters");
+        require( token.balanceOf(address(this)) > toBeClaimed, "Withdraw unsuccessful: all tokens are claimable by voters");
         uint withdrawAmount = toBeDistributed ;
         toBeDistributed = 0;
         token.transfer(msg.sender, withdrawAmount);
