@@ -3,7 +3,6 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat'
 import { Collection } from "../typechain-types";
 import { Sarco } from "../typechain-types";
-
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from 'ethers';
 
@@ -14,7 +13,6 @@ describe("Collections Contract", function () {
     let sarcoDao: SignerWithAddress;
     let voter1: SignerWithAddress;
     let voter2: SignerWithAddress;
-
 
     beforeEach(async () => {
       const Sarco = await ethers.getContractFactory("Sarco");
@@ -68,7 +66,7 @@ describe("Collections Contract", function () {
         await expect(collection.connect(sarcoDao).distribute(voters, amounts)).to.be.revertedWith('Arguments array length not equal');
       })
 
-      it("Claimable tokens by voters should be the sum of individual amounts distributed to voters", async () => {
+      it("claimable tokens by voters should be the sum of individual amounts distributed to voters", async () => {
         let amount = ethers.utils.parseEther('10')
         let amounts = [amount, amount]
         await distribute()
@@ -86,12 +84,13 @@ describe("Collections Contract", function () {
         await distribute()
         await sarco.connect(tokenOwner).transfer(collection.address, ethers.utils.parseEther('100'))        
         await distribute()
+
         expect(await collection.toBeDistributed()).to.equal(ethers.utils.parseEther('160').toString())
       })
     })
 
     describe("Claim", () => {
-      it("should have SARCO in voters balance", async () => {
+      it("should receive SARCO", async () => {
         await distribute()
         let amount = ethers.utils.parseEther('10')
         const balanceVoter1Before = await sarco.balanceOf(voter1.address)
@@ -104,7 +103,7 @@ describe("Collections Contract", function () {
         expect(await sarco.balanceOf(voter2.address)).to.equal(balanceVoter2Before.add(amount))
       })
 
-      it("should set to 0 the voters balance", async () => {
+      it("should set to 0 the voters balance in collection contract", async () => {
         await distribute()
         let amount = ethers.utils.parseEther('10')
         const balanceVoter1Before = await sarco.balanceOf(voter1.address)
@@ -153,7 +152,7 @@ describe("Collections Contract", function () {
         await expect(collection.connect(voter1).withdraw()).to.be.revertedWith('Ownable: caller is not the owner');
       })
 
-      it("should reject if tokens claimable by voters is greater than token balance of the contract", async () => {
+      it("should reject if tokens balance of contract is equal to claimable amounts by voters", async () => {
         let voters = [voter1.address, voter2.address]
         let amount = ethers.utils.parseEther('50')
         let amounts = [amount, amount]
