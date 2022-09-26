@@ -29,6 +29,7 @@ import type {
 
 export interface CollectionInterface extends utils.Interface {
   functions: {
+    "addReward(address[],uint256[])": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "claim()": FunctionFragment;
     "distribute(address[],uint256[])": FunctionFragment;
@@ -43,6 +44,7 @@ export interface CollectionInterface extends utils.Interface {
 
   getFunction(
     nameOrSignatureOrTopic:
+      | "addReward"
       | "balanceOf"
       | "claim"
       | "distribute"
@@ -55,6 +57,10 @@ export interface CollectionInterface extends utils.Interface {
       | "withdraw"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "addReward",
+    values: [PromiseOrValue<string>[], PromiseOrValue<BigNumberish>[]]
+  ): string;
   encodeFunctionData(
     functionFragment: "balanceOf",
     values: [PromiseOrValue<string>]
@@ -84,6 +90,7 @@ export interface CollectionInterface extends utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
 
+  decodeFunctionResult(functionFragment: "addReward", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "distribute", data: BytesLike): Result;
@@ -189,6 +196,12 @@ export interface Collection extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    addReward(
+      _to: PromiseOrValue<string>[],
+      _amount: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     balanceOf(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -225,6 +238,12 @@ export interface Collection extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
+
+  addReward(
+    _to: PromiseOrValue<string>[],
+    _amount: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   balanceOf(
     arg0: PromiseOrValue<string>,
@@ -263,6 +282,12 @@ export interface Collection extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    addReward(
+      _to: PromiseOrValue<string>[],
+      _amount: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     balanceOf(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -318,6 +343,12 @@ export interface Collection extends BaseContract {
   };
 
   estimateGas: {
+    addReward(
+      _to: PromiseOrValue<string>[],
+      _amount: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     balanceOf(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -356,6 +387,12 @@ export interface Collection extends BaseContract {
   };
 
   populateTransaction: {
+    addReward(
+      _to: PromiseOrValue<string>[],
+      _amount: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     balanceOf(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides

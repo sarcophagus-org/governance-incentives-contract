@@ -6,7 +6,6 @@ import { Sarco } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from 'ethers';
 
-
 describe("Collections Contract", function () {
     let collection: Collection;
     let sarco: Sarco;
@@ -14,9 +13,9 @@ describe("Collections Contract", function () {
     let sarcoDao: SignerWithAddress;
     let voter1: SignerWithAddress;
     let voter2: SignerWithAddress;
-    const zero = ethers.constants.Zero;
-    const initialContractBalance = ethers.utils.parseEther('100');
-    const voterIncentive = ethers.utils.parseEther('10');
+    let zero = ethers.constants.Zero;
+    let initialContractBalance: BigNumber = ethers.utils.parseEther('100');
+    let voterIncentive: BigNumber = ethers.utils.parseEther('10');
 
     beforeEach(async () => {
       const Sarco = await ethers.getContractFactory("Sarco");
@@ -35,6 +34,7 @@ describe("Collections Contract", function () {
     })
 
     async function distribute(amounts = [voterIncentive, voterIncentive], voters = [voter1.address, voter2.address]) {
+      // TODO: make this get the address inputs only - test needs to pre-populate amounts (rewards mapping in collections contract or v2?)
       await collection.connect(sarcoDao).distribute(voters, amounts)
     }
 
@@ -62,6 +62,14 @@ describe("Collections Contract", function () {
         await expect(collection.connect(voter1).distribute(voters, amounts)).to.be.revertedWith('Ownable: caller is not the owner');
       })
 
+      it("should revert if distributing more than its token balance", async () => {
+        let voters = [voter1.address, voter2.address]
+        let amount = initialContractBalance
+        let amounts = [amount, amount, amount]
+  
+        await expect(collection.connect(sarcoDao).distribute(voters, amounts)).to.be.reverted;
+      })
+
       it("should have same legth arrays for voters and amounts to be distributed", async () => {
         // TODO: mappings address to amount? this would remove this test
         let voters = [voter1.address, voter2.address]
@@ -78,18 +86,18 @@ describe("Collections Contract", function () {
       it("claimable tokens by voters should be the sum of individual amounts distributed to voters", async () => {
         let amounts = [voterIncentive, voterIncentive]
         await distribute(amounts)
-        // TODO: edge cases with large amounts and use sum
+        // TODO: edge cases with large amounts
         expect(await collection.toBeClaimed()).to.equal(sum(amounts))
       })
 
       it("should update amount to be distributed by netting what still needs to be claimed", async () => {
         let amounts = [voterIncentive, voterIncentive]
+        await sarco.connect(tokenOwner).transfer(collection.address, ethers.utils.parseEther('100'))  
         await distribute(amounts)
-        await sarco.connect(tokenOwner).transfer(collection.address, ethers.utils.parseEther('100'))        
         await distribute(amounts)
-
-        //TODO: use sum function
-        expect(await collection.toBeDistributed()).to.equal(ethers.utils.parseEther('160').toString())
+        let ContractBalanceAfter: BigNumber = await sarco.balanceOf(collection.address)
+        let leftToDistribute = ContractBalanceAfter.sub(sum(amounts)).sub(sum(amounts))
+        expect(await collection.toBeDistributed()).to.equal(leftToDistribute)
       })
     })
 
@@ -116,8 +124,8 @@ describe("Collections Contract", function () {
         await collection.connect(voter1).claim()
         await collection.connect(voter2).claim()
 
-        expect(await collection.balanceOf(voter1.address)).to.equal(BigNumber.from(0))
-        expect(await collection.balanceOf(voter1.address)).to.equal(BigNumber.from(0))
+        expect(await collection.balanceOf(voter1.address)).to.equal(zero)
+        expect(await collection.balanceOf(voter1.address)).to.equal(zero)
       })
 
       it("should fail if voter has no balance", async () => {
@@ -133,7 +141,7 @@ describe("Collections Contract", function () {
         await collection.connect(voter1).claim()
         await collection.connect(voter2).claim()
 
-        expect(await collection.toBeClaimed()).to.equal(BigNumber.from(0))
+        expect(await collection.toBeClaimed()).to.equal(zero)
       })
     })
 
@@ -157,7 +165,7 @@ describe("Collections Contract", function () {
       })
 
       it("should reject if tokens balance of contract is equal to claimable amounts by voters", async () => {
-        let amount = ethers.utils.parseEther('50') // TODO: initial balance /2
+        let amount = initialContractBalance.div(2);
         let amounts = [amount, amount]
         await distribute(amounts)
 
