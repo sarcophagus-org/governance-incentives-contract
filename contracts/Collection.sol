@@ -39,12 +39,8 @@ contract Collection is Ownable {
         }
     }
 
-    function addReward(address[] memory _to, uint[] memory _amount) public onlyOwner {
-        for (uint i = 0; i < _to.length; i++) {
-
-        }
-    }
-
+    // TODO: Pass in a struct array? address, amount // struct.address => struct.amont
+    // externally comes the struct
     function distribute(address[] memory _to, uint[] memory _amount) public onlyOwner {
         require(_to.length == _amount.length, "Arguments array length not equal");
         setDistributionAmount();
