@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -12,13 +12,21 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Collection is Ownable {
 
-    uint public toBeClaimed;
-    uint public toBeDistributed;
+    uint public withdrawableByDao;
+    uint public claimableByVoters;
     mapping(address => uint) public balanceOf;
 
-    event Distribution(address[], uint[]);
+    struct Reward {
+        address _address;
+        uint _amount;
+    }
+
+    event Rewards(Reward[]);
     event Claim(address, uint);
     event Withdraw(address, uint);
+
+    error InsufficientBalance();
+    error BalanceClaimableByVoters();
 
     IERC20 public immutable token;
 
@@ -27,48 +35,69 @@ contract Collection is Ownable {
     }
 
     /**
-     * @notice else{} represents the scenario where tokens have been transfered 
-     * to the Collections contract but have not yet beem claimed by voters
+     * @notice 
+     * @dev
      */
-
-    function setDistributionAmount() internal {
-        if(toBeClaimed == 0) {
-            toBeDistributed = token.balanceOf(address(this));
+    function updateInternalBalance() internal {
+        if(claimableByVoters == 0) {
+            withdrawableByDao = token.balanceOf(address(this));
         } else {
-            toBeDistributed = token.balanceOf(address(this)) - toBeClaimed;
+            withdrawableByDao = token.balanceOf(address(this)) - claimableByVoters;
         }
     }
 
-    // TODO: Pass in a struct array? address, amount // struct.address => struct.amont
-    // externally comes the struct
-    function distribute(address[] memory _to, uint[] memory _amount) public onlyOwner {
-        require(_to.length == _amount.length, "Arguments array length not equal");
-        setDistributionAmount();
- 
-        for (uint i = 0; i < _to.length; i++) {
-            toBeDistributed -= _amount[i];
-            balanceOf[_to[i]] += _amount[i];
-            toBeClaimed += _amount[i];
+    /**
+     * @notice 
+     * @dev
+     */
+    function setRewards(Reward[] memory rewards) public onlyOwner {
+        updateInternalBalance(); 
+
+        uint rewardsSum;
+        for (uint i = 0; i < rewards.length; i++) {
+            rewardsSum += rewards[i]._amount;
+        }
+        if( withdrawableByDao < rewardsSum ) revert InsufficientBalance();
+
+        for (uint i = 0; i < rewards.length; i++) {
+            withdrawableByDao -= rewards[i]._amount;
+            balanceOf[rewards[i]._address] += rewards[i]._amount;
+            claimableByVoters += rewards[i]._amount;
         }
 
-        emit Distribution(_to, _amount);
+        emit Rewards(rewards);
     }
 
+    /**
+     * @notice 
+     * @dev
+     * @param
+     * @return
+     */
     function claim() public returns(uint) {
-        require(balanceOf[msg.sender] > 0, "Claim unsuccessful: your balance is 0");
+        if( balanceOf[msg.sender] == 0 ) revert InsufficientBalance();
+
         uint claimAmount = balanceOf[msg.sender];
         balanceOf[msg.sender] = 0;
-        toBeClaimed -= claimAmount;
+        claimableByVoters -= claimAmount;
         token.transfer(msg.sender, claimAmount);
 
         emit Claim(msg.sender, claimAmount);
         return claimAmount;
     }
 
+    /**
+     * @notice 
+     * @dev
+     */
     function withdraw() public onlyOwner {
-        require( token.balanceOf(address(this)) > toBeClaimed, "Withdraw unsuccessful: all tokens are claimable by voters");
-        uint withdrawAmount = toBeDistributed ;
-        toBeDistributed = 0;
+        updateInternalBalance(); 
+
+        if( withdrawableByDao <= claimableByVoters ) revert BalanceClaimableByVoters();
+
+        uint withdrawAmount = withdrawableByDao ;
+        withdrawableByDao = 0;
+    
         token.transfer(msg.sender, withdrawAmount);
 
         emit Withdraw(msg.sender, withdrawAmount);

@@ -27,48 +27,54 @@ import type {
   PromiseOrValue,
 } from "../common";
 
+export declare namespace Collection {
+  export type RewardStruct = {
+    _address: PromiseOrValue<string>;
+    _amount: PromiseOrValue<BigNumberish>;
+  };
+
+  export type RewardStructOutput = [string, BigNumber] & {
+    _address: string;
+    _amount: BigNumber;
+  };
+}
+
 export interface CollectionInterface extends utils.Interface {
   functions: {
-    "addReward(address[],uint256[])": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "claim()": FunctionFragment;
-    "distribute(address[],uint256[])": FunctionFragment;
+    "claimableByVoters()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
-    "toBeClaimed()": FunctionFragment;
-    "toBeDistributed()": FunctionFragment;
+    "setRewards((address,uint256)[])": FunctionFragment;
     "token()": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "withdraw()": FunctionFragment;
+    "withdrawableByDao()": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "addReward"
       | "balanceOf"
       | "claim"
-      | "distribute"
+      | "claimableByVoters"
       | "owner"
       | "renounceOwnership"
-      | "toBeClaimed"
-      | "toBeDistributed"
+      | "setRewards"
       | "token"
       | "transferOwnership"
       | "withdraw"
+      | "withdrawableByDao"
   ): FunctionFragment;
 
-  encodeFunctionData(
-    functionFragment: "addReward",
-    values: [PromiseOrValue<string>[], PromiseOrValue<BigNumberish>[]]
-  ): string;
   encodeFunctionData(
     functionFragment: "balanceOf",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "claim", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "distribute",
-    values: [PromiseOrValue<string>[], PromiseOrValue<BigNumberish>[]]
+    functionFragment: "claimableByVoters",
+    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -76,12 +82,8 @@ export interface CollectionInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "toBeClaimed",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "toBeDistributed",
-    values?: undefined
+    functionFragment: "setRewards",
+    values: [Collection.RewardStruct[]]
   ): string;
   encodeFunctionData(functionFragment: "token", values?: undefined): string;
   encodeFunctionData(
@@ -89,41 +91,44 @@ export interface CollectionInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "withdrawableByDao",
+    values?: undefined
+  ): string;
 
-  decodeFunctionResult(functionFragment: "addReward", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "distribute", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "claimableByVoters",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "toBeClaimed",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "toBeDistributed",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "setRewards", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "token", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawableByDao",
+    data: BytesLike
+  ): Result;
 
   events: {
     "Claim(address,uint256)": EventFragment;
-    "Distribution(address[],uint256[])": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "Rewards(tuple[])": EventFragment;
     "Withdraw(address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Claim"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Distribution"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Rewards"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Withdraw"): EventFragment;
 }
 
@@ -134,17 +139,6 @@ export interface ClaimEventObject {
 export type ClaimEvent = TypedEvent<[string, BigNumber], ClaimEventObject>;
 
 export type ClaimEventFilter = TypedEventFilter<ClaimEvent>;
-
-export interface DistributionEventObject {
-  arg0: string[];
-  arg1: BigNumber[];
-}
-export type DistributionEvent = TypedEvent<
-  [string[], BigNumber[]],
-  DistributionEventObject
->;
-
-export type DistributionEventFilter = TypedEventFilter<DistributionEvent>;
 
 export interface OwnershipTransferredEventObject {
   previousOwner: string;
@@ -157,6 +151,16 @@ export type OwnershipTransferredEvent = TypedEvent<
 
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
+
+export interface RewardsEventObject {
+  arg0: Collection.RewardStructOutput[];
+}
+export type RewardsEvent = TypedEvent<
+  [Collection.RewardStructOutput[]],
+  RewardsEventObject
+>;
+
+export type RewardsEventFilter = TypedEventFilter<RewardsEvent>;
 
 export interface WithdrawEventObject {
   arg0: string;
@@ -196,12 +200,6 @@ export interface Collection extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    addReward(
-      _to: PromiseOrValue<string>[],
-      _amount: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
     balanceOf(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -211,11 +209,7 @@ export interface Collection extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    distribute(
-      _to: PromiseOrValue<string>[],
-      _amount: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+    claimableByVoters(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -223,9 +217,10 @@ export interface Collection extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    toBeClaimed(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    toBeDistributed(overrides?: CallOverrides): Promise<[BigNumber]>;
+    setRewards(
+      rewards: Collection.RewardStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
     token(overrides?: CallOverrides): Promise<[string]>;
 
@@ -237,13 +232,9 @@ export interface Collection extends BaseContract {
     withdraw(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-  };
 
-  addReward(
-    _to: PromiseOrValue<string>[],
-    _amount: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+    withdrawableByDao(overrides?: CallOverrides): Promise<[BigNumber]>;
+  };
 
   balanceOf(
     arg0: PromiseOrValue<string>,
@@ -254,11 +245,7 @@ export interface Collection extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  distribute(
-    _to: PromiseOrValue<string>[],
-    _amount: PromiseOrValue<BigNumberish>[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  claimableByVoters(overrides?: CallOverrides): Promise<BigNumber>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -266,9 +253,10 @@ export interface Collection extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  toBeClaimed(overrides?: CallOverrides): Promise<BigNumber>;
-
-  toBeDistributed(overrides?: CallOverrides): Promise<BigNumber>;
+  setRewards(
+    rewards: Collection.RewardStruct[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   token(overrides?: CallOverrides): Promise<string>;
 
@@ -281,13 +269,9 @@ export interface Collection extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  callStatic: {
-    addReward(
-      _to: PromiseOrValue<string>[],
-      _amount: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
+  withdrawableByDao(overrides?: CallOverrides): Promise<BigNumber>;
 
+  callStatic: {
     balanceOf(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -295,19 +279,16 @@ export interface Collection extends BaseContract {
 
     claim(overrides?: CallOverrides): Promise<BigNumber>;
 
-    distribute(
-      _to: PromiseOrValue<string>[],
-      _amount: PromiseOrValue<BigNumberish>[],
-      overrides?: CallOverrides
-    ): Promise<void>;
+    claimableByVoters(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
-    toBeClaimed(overrides?: CallOverrides): Promise<BigNumber>;
-
-    toBeDistributed(overrides?: CallOverrides): Promise<BigNumber>;
+    setRewards(
+      rewards: Collection.RewardStruct[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     token(overrides?: CallOverrides): Promise<string>;
 
@@ -317,17 +298,13 @@ export interface Collection extends BaseContract {
     ): Promise<void>;
 
     withdraw(overrides?: CallOverrides): Promise<void>;
+
+    withdrawableByDao(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   filters: {
     "Claim(address,uint256)"(arg0?: null, arg1?: null): ClaimEventFilter;
     Claim(arg0?: null, arg1?: null): ClaimEventFilter;
-
-    "Distribution(address[],uint256[])"(
-      arg0?: null,
-      arg1?: null
-    ): DistributionEventFilter;
-    Distribution(arg0?: null, arg1?: null): DistributionEventFilter;
 
     "OwnershipTransferred(address,address)"(
       previousOwner?: PromiseOrValue<string> | null,
@@ -338,17 +315,14 @@ export interface Collection extends BaseContract {
       newOwner?: PromiseOrValue<string> | null
     ): OwnershipTransferredEventFilter;
 
+    "Rewards(tuple[])"(arg0?: null): RewardsEventFilter;
+    Rewards(arg0?: null): RewardsEventFilter;
+
     "Withdraw(address,uint256)"(arg0?: null, arg1?: null): WithdrawEventFilter;
     Withdraw(arg0?: null, arg1?: null): WithdrawEventFilter;
   };
 
   estimateGas: {
-    addReward(
-      _to: PromiseOrValue<string>[],
-      _amount: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
     balanceOf(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -358,11 +332,7 @@ export interface Collection extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    distribute(
-      _to: PromiseOrValue<string>[],
-      _amount: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
+    claimableByVoters(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -370,9 +340,10 @@ export interface Collection extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    toBeClaimed(overrides?: CallOverrides): Promise<BigNumber>;
-
-    toBeDistributed(overrides?: CallOverrides): Promise<BigNumber>;
+    setRewards(
+      rewards: Collection.RewardStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
 
     token(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -384,15 +355,11 @@ export interface Collection extends BaseContract {
     withdraw(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    withdrawableByDao(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    addReward(
-      _to: PromiseOrValue<string>[],
-      _amount: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
     balanceOf(
       arg0: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -402,11 +369,7 @@ export interface Collection extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    distribute(
-      _to: PromiseOrValue<string>[],
-      _amount: PromiseOrValue<BigNumberish>[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
+    claimableByVoters(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -414,9 +377,10 @@ export interface Collection extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    toBeClaimed(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    toBeDistributed(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    setRewards(
+      rewards: Collection.RewardStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     token(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -428,5 +392,7 @@ export interface Collection extends BaseContract {
     withdraw(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
+
+    withdrawableByDao(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }
