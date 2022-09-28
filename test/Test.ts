@@ -27,7 +27,7 @@ describe("Contract: Collection", function () {
       sarco = await Sarco.connect(tokenOwner).deploy(tokenOwner.address) as Sarco; 
       collection = await Collection.connect(sarcoDao).deploy(sarco.address) as Collection;
 
-      // Funding the Collection contract with 100 SARCO (simulate sending the incentive fees for voters)
+      // Funding the Collection contract with 100 SARCO
       await sarco.connect(tokenOwner).transfer(collection.address, initialContractBalance)
     });
 
@@ -53,7 +53,7 @@ describe("Contract: Collection", function () {
         it("should set withdrawableByDao to match incentive fees that have not been allocated to voters", async () => {
           let rewards: any = [[voter1.address, voterReward], [voter2.address, voterReward]]
           await collection.connect(sarcoDao).setRewards(rewards)
-          // Sending additional incentive fees to the Collection contract
+          // Sending additional rewards to the Collection contract
           await sarco.connect(tokenOwner).transfer(collection.address, ethers.utils.parseEther('100')) 
           await collection.connect(sarcoDao).setRewards(rewards)
 
@@ -61,7 +61,7 @@ describe("Contract: Collection", function () {
           let claimableByVoters = await collection.claimableByVoters()
           let leftToDistribute = ContractBalanceAfter.sub(claimableByVoters) 
 
-          // confirm that what is withdrawable by DAO matches excess incentive fees that have not been allocated to voters
+          // confirm that what is withdrawable by DAO matches excess incentive fees that have not been yet allocated to voters
           expect(await collection.withdrawableByDao()).to.equal(leftToDistribute)
         })
 
@@ -84,7 +84,7 @@ describe("Contract: Collection", function () {
         it("should revert if distributing more than contract token balance", async () => {
           let voterReward = initialContractBalance
           let rewards: any = [[voter1.address, voterReward], [voter2.address, voterReward]]
-          // confirm contract is unable to distribute fees it has not yet received 
+          // confirm contract is unable to distribute fees that exceed its balance
           await expect(collection.connect(sarcoDao).setRewards(rewards)).to.be.revertedWith("InsufficientContractBalance")
         })
       })
@@ -106,7 +106,7 @@ describe("Contract: Collection", function () {
           await collection.connect(voter1).claim()
           await collection.connect(voter2).claim()
 
-          // confirm SARCO has reached voters' addresses
+          // confirm claimed SARCO has reached voters' addresses
           expect(await sarco.balanceOf(voter1.address)).to.equal(balanceVoter1Before.add(voterReward))
           expect(await sarco.balanceOf(voter2.address)).to.equal(balanceVoter2Before.add(voterReward))
         })
@@ -142,7 +142,7 @@ describe("Contract: Collection", function () {
           await collection.connect(sarcoDao).setRewards(rewards)
 
           await collection.connect(voter1).claim()
-          // Try to call claim again will not be possible as it has already been called and balance of voter has been set to 0
+          // Try to call claim() again but will revert as balance of voter has been set to 0 after it has called claim() the first time
           await expect(collection.connect(voter1).claim()).to.be.revertedWith('InsufficientVoterBalance')
         })
       })
@@ -162,7 +162,7 @@ describe("Contract: Collection", function () {
 
           await collection.connect(sarcoDao).daoWithdraw()
 
-          // confirm the Dao receives only what is withdrawable excluding what is claimable by voters
+          // confirm the Dao receives only what is withdrawable, excluding what is claimable by voters
           expect(await sarco.balanceOf(sarcoDao.address)).to.equal(withdrawableByDao)
         })
 
@@ -171,7 +171,6 @@ describe("Contract: Collection", function () {
 
           expect(await collection.connect(sarcoDao).daoWithdraw()).to.emit(voterReward, "Withdraw")
         })
-
       })
 
       context("Fail daoWithdraw", () => {
@@ -189,13 +188,13 @@ describe("Contract: Collection", function () {
 
         it("should revert if tokens balance of contract is equal to claimable amounts by voters", async () => {
           const withdrawableByDao = await collection.withdrawableByDao()
-          // Setting voter rewards as the amount of SARCO left in the contract that can still be distributed for voting incentives
+          // Setting voter rewards as the amount of SARCO left in the contract that can still be distributed for rewards
           voterReward = withdrawableByDao.div(2);
           let rewards: any = [[voter1.address, voterReward], [voter2.address, voterReward]]
 
           await collection.connect(sarcoDao).setRewards(rewards)
 
-          // confirm the owner is unable to withdraw SARCO as all the tokens in the contract are claimable by voters
+          // confirm the DAO/Owner is unable to withdraw SARCO as all the tokens in the contract are claimable by voters
           await expect(collection.connect(sarcoDao).daoWithdraw()).to.be.revertedWith("BalanceClaimableByVoters")
         })
       })

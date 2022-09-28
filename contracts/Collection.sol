@@ -11,23 +11,32 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * voters on Sarcophagus Dao proposals.
  */
 contract Collection is Ownable {
-    
-    /// @dev internal accounting for amount withdrawable by DAO/Owner
+    /**
+     * @dev internal accounting for amount withdrawable by DAO/Owner
+     */    
     uint public withdrawableByDao;
 
-    /// @dev internal accounting for total rewards claimable
+    /**
+     * @dev internal accounting for total rewards claimable
+     */
     uint public claimableByVoters;
 
-    /// @dev internal accounting for individual rewards claimable by voters
+    /**
+     * @dev internal accounting for individual rewards claimable by voters
+     */
     mapping(address => uint) public balanceOf;
 
-    /// @dev Voter rewards input definition 
+    /**
+     * @dev voter rewards input definition
+     */
     struct Reward {
         address _address;
         uint _amount;
     }
 
-    /// @notice Emitted when rewards are allocated to voters
+    /**
+     * @notice Emitted when rewards are allocated to voters
+     */
     event Rewards(Reward[]);
 
     /**
@@ -44,14 +53,24 @@ contract Collection is Ownable {
      */
     event Withdraw(address _address, uint withdrawAmount);
 
-    /// @notice Thrown trying to set more rewards to voters than available in the contract balance
+    /**
+     * @notice Thrown trying to set more rewards to voters than available in the contract balance
+     */
     error InsufficientContractBalance();
-    /// @notice Thrown trying to claim rewards when voter balance is 0 
+
+    /**
+     * @notice Thrown trying to claim rewards when voter balance is 0 
+     */
     error InsufficientVoterBalance();
-    /// @notice Thrown trying to withdraw some of the claimable tokens by the voters
+
+    /**
+     * @notice Thrown trying to withdraw some of the claimable tokens by the voters 
+     */
     error BalanceClaimableByVoters();
 
-    /// @notice instance of SARCO ERC20 token
+    /**
+     * @notice instance of SARCO ERC20 token
+     */
     IERC20 public immutable token;
 
     constructor(address _token) {
