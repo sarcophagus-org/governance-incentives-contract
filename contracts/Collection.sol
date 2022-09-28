@@ -26,7 +26,8 @@ contract Collection is Ownable {
     event Claim(address, uint);
     event Withdraw(address, uint);
 
-    error InsufficientBalance();
+    error InsufficientContractBalance();
+    error InsufficientVoterBalance();
     error BalanceClaimableByVoters();
 
     IERC20 public immutable token;
@@ -61,7 +62,7 @@ contract Collection is Ownable {
         for (uint i = 0; i < rewards.length; i++) {
             rewardsSum += rewards[i]._amount;
         }
-        if( withdrawableByDao < rewardsSum ) revert InsufficientBalance();
+        if( withdrawableByDao < rewardsSum ) revert InsufficientContractBalance();
 
         for (uint i = 0; i < rewards.length; i++) {
             withdrawableByDao -= rewards[i]._amount;
@@ -77,7 +78,7 @@ contract Collection is Ownable {
      * @return claimAmount the incentive amount each voter is due
      */
     function claim() public returns(uint) {
-        if( balanceOf[msg.sender] == 0 ) revert InsufficientBalance();
+        if( balanceOf[msg.sender] == 0 ) revert InsufficientVoterBalance();
 
         uint claimAmount = balanceOf[msg.sender];
         balanceOf[msg.sender] = 0;

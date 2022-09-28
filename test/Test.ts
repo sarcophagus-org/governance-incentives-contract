@@ -1,4 +1,4 @@
-import { describe, Context} from 'mocha';
+import { describe } from 'mocha';
 import { expect } from 'chai';
 import { ethers } from 'hardhat'
 import { Collection } from "../typechain-types";
@@ -7,7 +7,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from 'ethers';
 import { sum } from "./utils/helpers"
 
-describe.skip("Contract: Collection", function () {
+describe("Contract: Collection", function () {
     let collection: Collection;
     let sarco: Sarco;
     let tokenOwner: SignerWithAddress;
@@ -16,8 +16,6 @@ describe.skip("Contract: Collection", function () {
     let voter2: SignerWithAddress;
     let zero = ethers.constants.Zero;
     let initialContractBalance: BigNumber = ethers.utils.parseEther('100');
-    // TODO: put the amounts and voters as consts on the top of the file
-
 
     beforeEach(async () => {
       const Sarco = await ethers.getContractFactory("Sarco");
@@ -31,134 +29,158 @@ describe.skip("Contract: Collection", function () {
       await sarco.connect(tokenOwner).transfer(collection.address, initialContractBalance)
     });
 
-    describe.skip("distribute()", () => {
-      //context("Successfully manages internal accounting for 2 voters to claim 10 SARCO", async () => {
+    describe("setRewards()", () => {
+      context("Successfully allocates rewards of 10 SARCO to 2 voters", () => {
+        let voterIncentive = ethers.utils.parseEther('10');
 
-      let voterIncentive = ethers.utils.parseEther('10');
-      //let rewards: any = [[ voter1.address, voterIncentive], [voter2.address, voterIncentive]]
-      
-      
-        beforeEach(async () => {
-          console.log("before each start")
-        });
-        
-        it.skip("should distribute incentives among voters", async () => {
-          await collection.connect(sarcoDao).distribute(rewards)
+        it("should allocate rewards among voters", async () => {
+          let rewards: any = [[voter1.address, voterIncentive], [voter2.address, voterIncentive]]
+          await collection.connect(sarcoDao).setRewards(rewards)
+          
           expect(await collection.balanceOf(voter1.address)).to.equal(voterIncentive)
           expect(await collection.balanceOf(voter2.address)).to.equal(voterIncentive)
         })
 
-        // it("set claimable tokens as the sum of individual amounts distributed to voters", async () => {
-        //   expect(await collection.toBeClaimed()).to.equal(sum(rewards))
-        // })
+        it("should set claimable tokens as the sum of individual amounts allocated to voters", async () => {
+          let rewards: any = [[voter1.address, voterIncentive], [voter2.address, voterIncentive]]
+          await collection.connect(sarcoDao).setRewards(rewards)
 
-        // // add comment for context
-        // it("set amount to be distributed correctly by netting what still needs to be claimed by voters", async () => {
-        //   await sarco.connect(tokenOwner).transfer(collection.address, ethers.utils.parseEther('100'))  
-        //   await collection.connect(sarcoDao).distribute(rewards)
-        //   let ContractBalanceAfter: BigNumber = await sarco.balanceOf(collection.address)
-        //   let toBeClaimed = await collection.toBeClaimed()
-        //   let leftToDistribute = ContractBalanceAfter.sub(toBeClaimed)
-        //   expect(await collection.toBeDistributed()).to.equal(leftToDistribute)
-        // })
-      //})
+          expect(await collection.claimableByVoters()).to.equal(sum(rewards))
+        })
 
-      // context("Failed distribute", async () => {
+        it("should set withdrawableByDao correctly by netting what still needs to be claimed", async () => {
+          let rewards: any = [[voter1.address, voterIncentive], [voter2.address, voterIncentive]]
+          await collection.connect(sarcoDao).setRewards(rewards)
+          await sarco.connect(tokenOwner).transfer(collection.address, ethers.utils.parseEther('100')) 
+          await collection.connect(sarcoDao).setRewards(rewards)
+          let ContractBalanceAfter: BigNumber = await sarco.balanceOf(collection.address)
+          let claimableByVoters = await collection.claimableByVoters()
+          let leftToDistribute = ContractBalanceAfter.sub(claimableByVoters) 
+          expect(await collection.withdrawableByDao()).to.equal(leftToDistribute)
+        })
 
-      //   it.skip("should revert when function not called by owner", async () => {
-      //     let voterIncentive = ethers.utils.parseEther('10');
-      //     let rewards: any = [(voter1.address, voterIncentive), (voter2.address, voterIncentive)]
-      //     await expect(collection.connect(voter1.address).distribute(rewards)).to.be.revertedWith('Ownable: caller is not the owner');
-      //   })
+        it("emit Rewards", async () => {
+          let rewards: any = [[voter1.address, voterIncentive], [voter2.address, voterIncentive]]
+          
+          expect(await collection.connect(sarcoDao).setRewards(rewards))
+          .to.emit(rewards, "Rewards")
+        })
+      })
 
-      //   it("should revert if distributing more than its token balance", async () => {
-      //     let voterIncentive = initialContractBalance;
-      //     let rewards: any = [(voter1.address, voterIncentive), (voter2.address, voterIncentive)]
-    
-      //     await expect(collection.connect(sarcoDao).distribute(rewards)).to.be.revertedWith("Distributing more than contract balance");
-      //   })
+      context("Failed setRewards", () => {
+        it("should revert when function not called by owner", async () => {
+          let voterIncentive = ethers.utils.parseEther('10');
+          let rewards: any = [[voter1.address, voterIncentive], [voter2.address, voterIncentive]]
 
+          await expect(collection.connect(voter1).setRewards(rewards)).to.be.revertedWith('Ownable: caller is not the owner')
+        })
 
-       })
-   
+        it("should revert if distributing more than contract token balance", async () => {
+          let voterIncentive = initialContractBalance
+          let rewards: any = [[voter1.address, voterIncentive], [voter2.address, voterIncentive]]
+
+          await expect(collection.connect(sarcoDao).setRewards(rewards)).to.be.revertedWith("InsufficientContractBalance")
+        })
+      })
     })
 
-  //   describe.skip("Claim", () => {
-  //     // add context
-  //     // before each distribute (even part of the context)
-  //     it("should receive SARCO", async () => {
-  //       await distribute()
-  //       const balanceVoter1Before = await sarco.balanceOf(voter1.address)
-  //       const balanceVoter2Before = await sarco.balanceOf(voter2.address)
-        
-  //       await collection.connect(voter1).claim()
-  //       await collection.connect(voter2).claim()
+    describe("claim()", () => {
+      context("2 voters successfully claim 10 SARCO each", () => {
+        let voterIncentive = ethers.utils.parseEther('10');
 
-  //       expect(await sarco.balanceOf(voter1.address)).to.equal(balanceVoter1Before.add(voterIncentive))
-  //       expect(await sarco.balanceOf(voter2.address)).to.equal(balanceVoter2Before.add(voterIncentive))
-  //     })
+        beforeEach(async () => {
+          let rewards: any = [[voter1.address, voterIncentive], [voter2.address, voterIncentive]]
+          await collection.connect(sarcoDao).setRewards(rewards)
+        });
 
-  //     it("should set to 0 the voters balance in collection contract", async () => {
-  //       let amounts = [voterIncentive, voterIncentive]
-  //       await distribute(amounts)
+        it("SARCO balance of voters should increase by 10 SARCO each ", async () => {
+          const balanceVoter1Before = await sarco.balanceOf(voter1.address)
+          const balanceVoter2Before = await sarco.balanceOf(voter2.address)
 
-  //       const balanceVoter1Before = await sarco.balanceOf(voter1.address)
-  //       const balanceVoter2Before = await sarco.balanceOf(voter2.address)
-        
-  //       await collection.connect(voter1).claim()
-  //       await collection.connect(voter2).claim()
+          await collection.connect(voter1).claim()
+          await collection.connect(voter2).claim()
 
-  //       expect(await collection.balanceOf(voter1.address)).to.equal(zero)
-  //       expect(await collection.balanceOf(voter1.address)).to.equal(zero)
-  //     })
+          expect(await sarco.balanceOf(voter1.address)).to.equal(balanceVoter1Before.add(voterIncentive))
+          expect(await sarco.balanceOf(voter2.address)).to.equal(balanceVoter2Before.add(voterIncentive))
+        })
 
-  //     it("should fail if voter has no balance", async () => {
-  //       await distribute()
+        it("Should reset the voters internal accounting mapping balanceOf[]", async () => {
+          await collection.connect(voter1).claim()
+          await collection.connect(voter2).claim()
 
-  //       await collection.connect(voter1).claim()
+          expect(await collection.balanceOf(voter1.address)).to.equal(zero)
+          expect(await collection.balanceOf(voter1.address)).to.equal(zero)
+        })
 
-  //       await expect(collection.connect(voter1).claim()).to.be.revertedWith('Claim unsuccessful: your balance is 0');
-  //     })
 
-  //     it("should set tokens to be claimed to 0 once all amounts have been claimed", async () => {
-  //       await distribute()
-  //       await collection.connect(voter1).claim()
-  //       await collection.connect(voter2).claim()
+        it("should set tokens claimableByVoters too 0 once all have been claimed", async () => {
+          await collection.connect(voter1).claim()
+          await collection.connect(voter2).claim()
 
-  //       expect(await collection.toBeClaimed()).to.equal(zero)
-  //     })
-  //   })
+          expect(await collection.claimableByVoters()).to.equal(zero)
+        })
 
-  //   describe.skip("Dao Withdraw", () => {
-  //     // Contex
-  //     it("should transfer remaining balance of the contract, netting the claimable tokens", async () => {
-  //       await distribute()
-   
-  //       const balanceToStillBeDistributed = await collection.toBeDistributed()
+        it("emit Claim", async () => {
+          expect(await collection.connect(voter1).claim())
+          .to.emit(voterIncentive, "Claim")
+        })
+      })
 
-  //       await collection.connect(sarcoDao).withdraw()
+      context("Failed claim", () => {
+        let voterIncentive = ethers.utils.parseEther('10');
 
-  //       expect(await sarco.balanceOf(sarcoDao.address)).to.equal(balanceToStillBeDistributed)
-  //     })
+        it("should revert if voter has no rewards to claim", async () => {
+          let rewards: any = [[voter1.address, voterIncentive], [voter2.address, voterIncentive]]
+          await collection.connect(sarcoDao).setRewards(rewards)
 
-  //     it("should reject if called by non owner", async () => {
-  //       // is the following necessary?
-  //       // await distribute()
-  //       // await collection.connect(voter1).claim()
-  //       // await collection.connect(voter2).claim()
+          await collection.connect(voter1).claim()
+          // as claim() lets the voter withdraw all its balance, calling the function again will give the folling error
 
-  //       await expect(collection.connect(voter1).withdraw()).to.be.revertedWith('Ownable: caller is not the owner');
-  //     })
+          await expect(collection.connect(voter1).claim()).to.be.revertedWith('InsufficientVoterBalance')
+        })
+      })
+    })
 
-  //     it("should reject if tokens balance of contract is equal to claimable amounts by voters", async () => {
-  //       let amount = initialContractBalance.div(2);
-  //       let amounts = [amount, amount]
-  //       await distribute(amounts)
+    describe("daoWithdraw()", () => {
+      context("Successfully withdraw any excess rewards", () => {
+        let voterIncentive = ethers.utils.parseEther('10');
 
-  //       await expect(collection.connect(sarcoDao).withdraw()).to.be.revertedWith('Withdraw unsuccessful: all tokens are claimable by voters');
-  //     })
-  //   })
-  // });
+        beforeEach(async () => {
+          let rewards: any = [[voter1.address, voterIncentive], [voter2.address, voterIncentive]]
+          await collection.connect(sarcoDao).setRewards(rewards)
+        });
 
-  // it('reverts with a null token', async function () {
-  //   await expectRevert(
+        it("should transfer remaining balance of the contract", async () => {
+          const withdrawableByDao = await collection.withdrawableByDao()
+
+          await collection.connect(sarcoDao).daoWithdraw()
+
+          expect(await sarco.balanceOf(sarcoDao.address)).to.equal(withdrawableByDao)
+        })
+      })
+
+      context("Fail daoWithdraw", () => {
+        let voterIncentive = ethers.utils.parseEther('10');
+
+        beforeEach(async () => {
+          let rewards: any = [[voter1.address, voterIncentive], [voter2.address, voterIncentive]]
+          await collection.connect(sarcoDao).setRewards(rewards)
+        });
+
+        it("should revert when function not called by owner", async () => {
+          await expect(collection.connect(voter1).daoWithdraw())
+          .to.be.revertedWith('Ownable: caller is not the owner')
+        })
+
+        it("should revert if tokens balance of contract is equal to claimable amounts by voters", async () => {
+          const withdrawableByDao = await collection.withdrawableByDao()
+          voterIncentive = withdrawableByDao.div(2);
+          let rewards: any = [[voter1.address, voterIncentive], [voter2.address, voterIncentive]]
+          await collection.connect(sarcoDao).setRewards(rewards)
+
+          await expect(collection.connect(sarcoDao).daoWithdraw()).to.be.revertedWith("BalanceClaimableByVoters")
+        })
+      })
+    })
+})
+

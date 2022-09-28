@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/solidoracle/Documents/Web3/DecentDao/governance-incentives-contract/contracts/Collection.sol": {
-      "lastModificationDate": 1664356230699,
-      "contentHash": "237e1416c94729f4ce0c8a63fc5dc400",
+      "lastModificationDate": 1664361008240,
+      "contentHash": "bae04264cd1ef9161f1e53972709fb87",
       "sourceName": "contracts/Collection.sol",
       "solcConfig": {
         "version": "0.8.13",
