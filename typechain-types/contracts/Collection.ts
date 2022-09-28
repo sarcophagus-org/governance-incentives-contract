@@ -139,8 +139,8 @@ export interface CollectionInterface extends utils.Interface {
 }
 
 export interface ClaimEventObject {
-  arg0: string;
-  arg1: BigNumber;
+  _address: string;
+  claimAmount: BigNumber;
 }
 export type ClaimEvent = TypedEvent<[string, BigNumber], ClaimEventObject>;
 
@@ -169,8 +169,8 @@ export type RewardsEvent = TypedEvent<
 export type RewardsEventFilter = TypedEventFilter<RewardsEvent>;
 
 export interface WithdrawEventObject {
-  arg0: string;
-  arg1: BigNumber;
+  _address: string;
+  withdrawAmount: BigNumber;
 }
 export type WithdrawEvent = TypedEvent<
   [string, BigNumber],
@@ -309,8 +309,11 @@ export interface Collection extends BaseContract {
   };
 
   filters: {
-    "Claim(address,uint256)"(arg0?: null, arg1?: null): ClaimEventFilter;
-    Claim(arg0?: null, arg1?: null): ClaimEventFilter;
+    "Claim(address,uint256)"(
+      _address?: null,
+      claimAmount?: null
+    ): ClaimEventFilter;
+    Claim(_address?: null, claimAmount?: null): ClaimEventFilter;
 
     "OwnershipTransferred(address,address)"(
       previousOwner?: PromiseOrValue<string> | null,
@@ -324,8 +327,11 @@ export interface Collection extends BaseContract {
     "Rewards(tuple[])"(arg0?: null): RewardsEventFilter;
     Rewards(arg0?: null): RewardsEventFilter;
 
-    "Withdraw(address,uint256)"(arg0?: null, arg1?: null): WithdrawEventFilter;
-    Withdraw(arg0?: null, arg1?: null): WithdrawEventFilter;
+    "Withdraw(address,uint256)"(
+      _address?: null,
+      withdrawAmount?: null
+    ): WithdrawEventFilter;
+    Withdraw(_address?: null, withdrawAmount?: null): WithdrawEventFilter;
   };
 
   estimateGas: {
