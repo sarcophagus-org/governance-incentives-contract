@@ -7,7 +7,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /**
  * @title Collection Contract
  * @notice This contract is responsible for custody of Sarcophagus fees collected 
- * via protocol fees, as well as the distribution of those fees.
+ * via protocol fees, as well as the distribution of those fees to incentivise 
+ * voters on Sarco Dao proposals.
  */
 
 contract Collection is Ownable {
@@ -35,8 +36,10 @@ contract Collection is Ownable {
     }
 
     /**
-     * @notice 
-     * @dev
+     * @notice internal function to set amount withdrawableByDao to the SARCO balance
+     * of the contract netted on any claimable fees 
+     * @dev needed to keep track of the internal accounting and called in setRewards()
+     * and withdraw()
      */
     function updateInternalBalance() internal {
         if(claimableByVoters == 0) {
@@ -47,8 +50,9 @@ contract Collection is Ownable {
     }
 
     /**
-     * @notice 
-     * @dev
+     * @notice allocates rewards to voters
+     * @param rewards array of structs that holds info on voters addresses and amounts 
+     * to be transfered
      */
     function setRewards(Reward[] memory rewards) public onlyOwner {
         updateInternalBalance(); 
@@ -69,10 +73,8 @@ contract Collection is Ownable {
     }
 
     /**
-     * @notice 
-     * @dev
-     * @param
-     * @return
+     * @notice enables voters to withdraw their voting incentives
+     * @return claimAmount the incentive amount each voter is due
      */
     function claim() public returns(uint) {
         if( balanceOf[msg.sender] == 0 ) revert InsufficientBalance();
@@ -87,10 +89,9 @@ contract Collection is Ownable {
     }
 
     /**
-     * @notice 
-     * @dev
+     * @notice withdraw function for the Dao for any unallocated rewards
      */
-    function withdraw() public onlyOwner {
+    function daoWithdraw() public onlyOwner {
         updateInternalBalance(); 
 
         if( withdrawableByDao <= claimableByVoters ) revert BalanceClaimableByVoters();
