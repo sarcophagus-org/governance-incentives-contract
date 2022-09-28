@@ -120,7 +120,7 @@ describe("Contract: Collection", function () {
           expect(await collection.balanceOf(voter1.address)).to.equal(zero)
         })
 
-        it("should set claimable tokens by voters too 0 once all have been claimed", async () => {
+        it("should set total claimable tokens by voters to 0 once all have been claimed", async () => {
           await collection.connect(voter1).claim()
           await collection.connect(voter2).claim()
 
@@ -165,6 +165,13 @@ describe("Contract: Collection", function () {
           // confirm the Dao receives only what is withdrawable excluding what is claimable by voters
           expect(await sarco.balanceOf(sarcoDao.address)).to.equal(withdrawableByDao)
         })
+
+        it("emit Withdraw", async () => {
+          const withdrawableByDao = await collection.withdrawableByDao()
+
+          expect(await collection.connect(sarcoDao).daoWithdraw()).to.emit(voterReward, "Withdraw")
+        })
+
       })
 
       context("Fail daoWithdraw", () => {
