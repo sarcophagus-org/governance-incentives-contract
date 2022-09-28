@@ -1,10 +1,10 @@
 import { ethers } from 'hardhat'
-import { BigNumber } from 'ethers';
 let zero = ethers.constants.Zero;   
 
 
 /**
- * Sums amounts in an array
+ * Sums incentive amounts that is due to voters 
+ * in the rewards array
  */
 
 export function sum(rewards: any) {
