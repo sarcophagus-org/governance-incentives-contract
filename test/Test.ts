@@ -5,7 +5,7 @@ import { Collection } from "../typechain-types";
 import { Sarco } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from 'ethers';
-import { sum } from "./utils/helpers"
+import { randomSigners, sum } from "./utils/helpers"
 
 let collection: Collection;
 let sarco: Sarco;
@@ -73,21 +73,15 @@ describe("Contract: Collection", function () {
         })
       })
 
-      context("Failed setRewards", () => {
-        it("should revert when function not called by owner", async () => {
-          let voterReward = ethers.utils.parseEther('10');
-          let rewards: any = [[voter1.address, voterReward], [voter2.address, voterReward]]
+      context("Successfully randomly allocates contract balance of 100 SARCO to 50 voters", () => {
+        it("Complex test", async () => {
+          randomSigners(50)
+          
 
-          await expect(collection.connect(voter1).setRewards(rewards)).to.be.revertedWith('Ownable: caller is not the owner')
         })
-
-        it("should revert if distributing more than contract token balance", async () => {
-          let voterReward = initialContractBalance
-          let rewards: any = [[voter1.address, voterReward], [voter2.address, voterReward]]
-          // confirm contract is unable to distribute rewards that exceed its balance
-          await expect(collection.connect(sarcoDao).setRewards(rewards)).to.be.revertedWith("InsufficientContractBalance")
-        })
+ 
       })
+
     })
 
     describe("claim()", () => {

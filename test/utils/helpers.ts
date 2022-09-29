@@ -1,5 +1,8 @@
-import { ethers } from 'hardhat'
+import { ethers } from 'ethers'
+
 let zero = ethers.constants.Zero;   
+
+interface Signer {}
 
 /**
  * @notice Sums rewards amounts that are due to voters 
@@ -14,3 +17,11 @@ export function sum(rewards: any) {
     }
     return sum
    }
+
+  export const randomSigners = (amount: number): Signer[] => {
+  const signers: Signer[] = []
+  for (let i = 0; i < amount; i++) {
+    signers.push(ethers.Wallet.createRandom())
+  }
+  return signers
+}
