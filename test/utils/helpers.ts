@@ -1,10 +1,10 @@
 import { ethers } from 'hardhat'
 let zero = ethers.constants.Zero;   
 
-
 /**
- * Sums incentive amounts that is due to voters 
- * in the rewards array
+ * @notice Sums rewards amounts that are due to voters 
+ * @param rewards Array of structs of voters' addresses and amounts 
+ * to be transfered 
  */
 
 export function sum(rewards: any) {

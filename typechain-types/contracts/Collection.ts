@@ -45,6 +45,7 @@ export interface CollectionInterface extends utils.Interface {
     "claim()": FunctionFragment;
     "claimableByVoters()": FunctionFragment;
     "daoWithdraw()": FunctionFragment;
+    "getContractBalance()": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "setRewards((address,uint256)[])": FunctionFragment;
@@ -59,6 +60,7 @@ export interface CollectionInterface extends utils.Interface {
       | "claim"
       | "claimableByVoters"
       | "daoWithdraw"
+      | "getContractBalance"
       | "owner"
       | "renounceOwnership"
       | "setRewards"
@@ -78,6 +80,10 @@ export interface CollectionInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "daoWithdraw",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getContractBalance",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
@@ -107,6 +113,10 @@ export interface CollectionInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "daoWithdraw",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getContractBalance",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -221,6 +231,10 @@ export interface Collection extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    getContractBalance(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { contractBalance: BigNumber }>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     renounceOwnership(
@@ -257,6 +271,8 @@ export interface Collection extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  getContractBalance(overrides?: CallOverrides): Promise<BigNumber>;
+
   owner(overrides?: CallOverrides): Promise<string>;
 
   renounceOwnership(
@@ -288,6 +304,8 @@ export interface Collection extends BaseContract {
     claimableByVoters(overrides?: CallOverrides): Promise<BigNumber>;
 
     daoWithdraw(overrides?: CallOverrides): Promise<void>;
+
+    getContractBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
@@ -350,6 +368,8 @@ export interface Collection extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    getContractBalance(overrides?: CallOverrides): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceOwnership(
@@ -385,6 +405,10 @@ export interface Collection extends BaseContract {
 
     daoWithdraw(
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    getContractBalance(
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;

@@ -7,27 +7,27 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /**
  * @title Collection Contract
  * @notice Responsible for custody of Sarcophagus fees collected 
- * via protocol fees, as well as the distribution of those fees to incentivise 
- * voters on Sarcophagus Dao proposals.
+ * via protocol fees, as well as the distribution of those fees to reward
+ * and incentivise voters on Sarcophagus Dao proposals.
  */
 contract Collection is Ownable {
     /**
-     * @dev internal accounting for amount withdrawable by DAO/Owner
+     * @dev Internal accounting for amount withdrawable by DAO/Owner
      */    
     uint public withdrawableByDao;
 
     /**
-     * @dev internal accounting for total rewards claimable
+     * @dev Internal accounting for total rewards claimable by voters
      */
     uint public claimableByVoters;
 
     /**
-     * @dev internal accounting for individual rewards claimable by voters
+     * @dev Internal accounting for individual rewards claimable by voters
      */
     mapping(address => uint) public balanceOf;
 
     /**
-     * @dev voter rewards input definition
+     * @dev Voter reward definition
      */
     struct Reward {
         address _address;
@@ -41,20 +41,20 @@ contract Collection is Ownable {
 
     /**
      * @notice Emitted when voter claims the reward
-     * @param _address voter address
-     * @param claimAmount amount claimed
+     * @param _address Voter address
+     * @param claimAmount Amount claimed
      */
     event Claim(address _address, uint claimAmount);
 
     /**
      * @notice Emitted when DAO/Owner claims unallocated rewards
      * @param _address DAO/Owner address
-     * @param withdrawAmount amount to withdraw
+     * @param withdrawAmount Amount to withdraw
      */
     event Withdraw(address _address, uint withdrawAmount);
 
     /**
-     * @notice Thrown trying to set more rewards to voters than available in the contract balance
+     * @notice Thrown trying to set more rewards to voters than available in contract balance
      */
     error InsufficientContractBalance();
 
@@ -64,12 +64,12 @@ contract Collection is Ownable {
     error InsufficientVoterBalance();
 
     /**
-     * @notice Thrown trying to withdraw some of the claimable tokens by the voters 
+     * @notice Thrown trying to withdraw the claimable rewards allocated to voters 
      */
     error BalanceClaimableByVoters();
 
     /**
-     * @notice instance of SARCO ERC20 token
+     * @notice Instance of SARCO ERC20 token
      */
     IERC20 public immutable token;
 
@@ -78,22 +78,30 @@ contract Collection is Ownable {
     }
 
     /**
-     * @notice internal function to set amount withdrawableByDao to the SARCO balance
-     * of the contract netted of any claimable fees 
-     * @dev needed to keep track of the internal accounting. Called in setRewards()
+     * @notice Internal function to set amount withdrawableByDao to the SARCO balance
+     * of the contract, netting any claimable rewards by voters
+     * @dev To keep track of the internal accounting. Called in setRewards()
      * and daoWithdraw()
      */
     function updateInternalBalance() internal {
         if(claimableByVoters == 0) {
-            withdrawableByDao = token.balanceOf(address(this));
+            withdrawableByDao = getContractBalance();
         } else {
-            withdrawableByDao = token.balanceOf(address(this)) - claimableByVoters;
+            withdrawableByDao = getContractBalance() - claimableByVoters;
         }
     }
 
     /**
-     * @notice allocates rewards to voters
-     * @param rewards array of structs that hold info on voters addresses and amounts 
+     * @notice Gets contract balance
+     * @return contractBalance SARCO balance of Collection contract
+     */
+    function getContractBalance() public view returns(uint contractBalance) {
+        return token.balanceOf(address(this));
+    }
+
+    /**
+     * @notice Allocates rewards to voters
+     * @param rewards Array of structs of voters' addresses and amounts 
      * to be transfered
      */
     function setRewards(Reward[] memory rewards) public onlyOwner {
@@ -115,8 +123,8 @@ contract Collection is Ownable {
     }
 
     /**
-     * @notice enables voters to withdraw their allocated voting incentives
-     * @return claimAmount the incentive amount each voter is due
+     * @notice Enables voters to withdraw their allocated rewards
+     * @return claimAmount Reward amount each voter is due
      */
     function claim() public returns(uint) {
         if( balanceOf[msg.sender] == 0 ) revert InsufficientVoterBalance();
@@ -131,11 +139,9 @@ contract Collection is Ownable {
     }
 
     /**
-     * @notice withdraw function for the Dao/Owner for any unallocated rewards
+     * @notice Withdraw any unallocated rewards by Dao/Owner
      */
     function daoWithdraw() public onlyOwner {
-        updateInternalBalance(); 
-
         if( withdrawableByDao <= claimableByVoters ) revert BalanceClaimableByVoters();
 
         uint withdrawAmount = withdrawableByDao ;
