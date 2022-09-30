@@ -5,7 +5,7 @@ import { Collection } from "../typechain-types";
 import { Sarco } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from 'ethers';
-import { randomSigners, sum } from "./utils/helpers"
+import { randomSigners, sum, randomRewards } from "./utils/helpers"
 
 let collection: Collection;
 let sarco: Sarco;
@@ -75,13 +75,46 @@ describe("Contract: Collection", function () {
 
       context("Successfully randomly allocates contract balance of 100 SARCO to 50 voters", () => {
         it("Complex test", async () => {
-          randomSigners(50)
-          
+          //let rewards: any = randomRewards(2, initialContractBalance)
 
+          function strip(number: any) {
+            return (parseFloat(number).toPrecision(12));
+        }
+
+
+          function distribute(): any {
+            let length = 3
+            let value = +ethers.utils.formatEther(initialContractBalance) 
+
+            if (length <= 1)
+                return [value];
+
+            let half = Math.floor(length / 2)
+            // let randomMathBN = BigNumber.from(Math.random() * 100000000000000000)
+            // let multiplication: BigNumber = value.mul(randomMathBN)
+
+            // let dist = BigNumber.from(Math.floor(multiplication.toNumber()));
+
+            // return distribute(half, dist).concat(distribute(length-half, value.sub(dist)));
+
+            // let calculations = value.mul(BigNumber.from(Math.random() * 10000000000000000))
+
+            let calculations = value.mul(BigNumber.from(Math.random() * 10000000000000000))
+
+            console.log(strip(Math.random()))
+            
+            //console.log(calculations.toNumber())
+            // let dist: BigNumber = BigNumber.from(Math.floor(calculations.toNumber()));
+            // console.log(dist.mul(100))
+            // return distribute(half, dist).concat(distribute(length-half, value.sub(dist)));
+
+
+          }
+
+          console.log(distribute())
+          //await collection.connect(sarcoDao).setRewards(rewards)
         })
- 
       })
-
     })
 
     describe("claim()", () => {
