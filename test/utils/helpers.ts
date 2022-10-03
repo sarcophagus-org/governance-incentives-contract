@@ -1,5 +1,6 @@
+import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat'
-let zero = ethers.constants.Zero;   
+const zero = ethers.constants.Zero;   
 
 /**
  * @notice Sums rewards amounts that are due to voters 
@@ -7,10 +8,17 @@ let zero = ethers.constants.Zero;
  * to be transfered 
  */
 
-export function sum(rewards: any) {
-    let sum = zero;
-    for (let i in rewards) {
-      sum = sum.add(rewards[i][1]);
-    }
-    return sum
-   }
+export interface Reward {
+  _address: string;
+  _amount: BigNumber;
+}
+
+export function sum(rewards: Reward[]): BigNumber {
+  let sum = zero;
+  for (let i in rewards) {
+    sum = sum.add(rewards[i]._amount);
+  }
+  return sum
+ }
+
+ 
