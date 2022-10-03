@@ -48,6 +48,15 @@ export function sum(rewards: any) {
     // return distribute(half, dist).concat(distribute(length-half, value-dist));
 
 
+  //   function distribute(length, value) {
+  //     if (length <= 1)
+  //         return [value];
+  //     var half = Math.floor(length / 2),
+  //         dist = Math.floor(Math.random() * value);
+  //     return distribute(half, dist).concat(distribute(length-half, value-dist));
+  // }
+
+
   }
 
   export function randomRewards(numberSigners: number, totalRewardAmount: BigNumber): VoterReward[] {

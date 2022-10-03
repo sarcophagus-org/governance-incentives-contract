@@ -77,19 +77,18 @@ describe("Contract: Collection", function () {
         it("Complex test", async () => {
           //let rewards: any = randomRewards(2, initialContractBalance)
 
-          function strip(number: any) {
-            return (parseFloat(number).toPrecision(12));
-        }
-
-
           function distribute(): any {
-            let length = 3
-            let value = +ethers.utils.formatEther(initialContractBalance) 
+            let length: number = 2
+            let value: BigNumber = initialContractBalance
 
             if (length <= 1)
                 return [value];
 
             let half = Math.floor(length / 2)
+
+
+
+            
             // let randomMathBN = BigNumber.from(Math.random() * 100000000000000000)
             // let multiplication: BigNumber = value.mul(randomMathBN)
 
