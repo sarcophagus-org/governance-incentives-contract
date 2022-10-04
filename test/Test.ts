@@ -5,7 +5,7 @@ import { Collection } from "../typechain-types";
 import { Sarco } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from 'ethers';
-import { sum, Reward, zero} from "./utils/helpers"
+import { sum, Reward, zero, randomRewards} from "./utils/helpers"
 
 let collection: Collection;
 let sarco: Sarco;
@@ -31,7 +31,7 @@ describe("Contract: Collection", function () {
     });
 
     describe("allocateRewards()", () => {
-      context("Successfully allocates rewards to voters", () => {
+      context.skip("Successfully allocates rewards to voters", () => {
         let voterReward = ethers.utils.parseEther('10');
 
         it("should allocate rewards among 2 voters", async () => {
@@ -77,7 +77,20 @@ describe("Contract: Collection", function () {
         })
       })
 
-      context("Failed setRewards", () => {
+      context("Successfully randomly allocates contract balance of 100 SARCO to 50 voters", () => {
+        let voterReward = ethers.utils.parseEther('10');
+
+        it("Complex test", async () => {
+ 
+
+          let random = randomRewards(10, initialContractBalance)
+          console.log(random)
+          console.log(sum(random))
+
+        })
+      })
+
+      context.skip("Failed setRewards", () => {
         it("should revert when function not called by owner", async () => {
           let voterReward = ethers.utils.parseEther('10');
           let rewards: Reward[] = [{_address: voter1.address, _amount: voterReward}, {_address: voter2.address, _amount: voterReward}]
@@ -96,7 +109,7 @@ describe("Contract: Collection", function () {
       })
     })
 
-    describe("claim()", () => {
+    describe.skip("claim()", () => {
       context("Successfully claim the SARCO by 2 voters", () => {
         let voterReward = ethers.utils.parseEther('10');
 
@@ -154,7 +167,7 @@ describe("Contract: Collection", function () {
       })
     })
 
-    describe("daoWithdraw()", () => {
+    describe.skip("daoWithdraw()", () => {
       context("Successfully withdraw any unallocated rewards by DAO/Owner", () => {
         let voterReward = ethers.utils.parseEther('10');
 
