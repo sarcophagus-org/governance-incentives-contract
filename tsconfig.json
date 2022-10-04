@@ -15,8 +15,8 @@
       "./test",
       "./typechain",
       "./deploy",
-      "./types"
-, "Test.ts", "Test_old.ts", "Test_old copy.ts", "Test_old.ts"    ],
+      "./types", 
+      "Test.ts"  ],
     "files": [
       "./hardhat.config.ts",
     ],
