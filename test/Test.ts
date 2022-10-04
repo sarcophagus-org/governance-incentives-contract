@@ -85,7 +85,7 @@ describe("Contract: Collection", function () {
 
           let random = randomRewards(10, initialContractBalance)
           console.log(random)
-          console.log(sum(random))
+          console.log("Sum =",sum(random))
 
         })
       })
