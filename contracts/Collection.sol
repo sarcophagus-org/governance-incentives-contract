@@ -45,7 +45,7 @@ contract Collection is Ownable {
     /**
      * @notice Internal function to set amount withdrawableByDao to the SARCO balance
      * of the contract, netting any claimable rewards by voters
-     * @dev To keep track of the internal accounting. Called in setRewards()
+     * @dev To keep track of the internal accounting. Called in allocateRewards()
      * and daoWithdraw()
      */
     function updateInternalBalance() internal {
@@ -64,29 +64,10 @@ contract Collection is Ownable {
     function allocateRewards(Reward[] memory rewards) public onlyOwner {
         updateInternalBalance(); 
 
-        /* uint rewardsSum;
-        // for (uint i = 0; i < rewards.length; i++) {
-        //     rewardsSum += rewards[i]._amount;
-        // }
-        // if( withdrawableByDao < rewardsSum ) revert InsufficientContractBalance();
-        //
-        // for (uint i = 0; i < rewards.length; i++) {
-        //     withdrawableByDao -= rewards[i]._amount;
-        //     balanceOf[rewards[i]._address] += rewards[i]._amount;
-        //     claimableByVoters += rewards[i]._amount;
-        // }
-        // combining these two gives the following error:
-        - an overflow if we set amount larger than withdrawableByDao
-        - the error check gives a false positive. unallocated rewards and rewards sum 
-        need to be compared before the amounts get added/subtracted
-
-        */
         uint rewardsSum;
         for (uint i = 0; i < rewards.length; i++) {
             rewardsSum += rewards[i]._amount;
             balanceOf[rewards[i]._address] += rewards[i]._amount;            
-            // unallocatedRewards -= rewards[i]._amount;
-            // claimableByVoters += rewards[i]._amount;
         }
 
         if( unallocatedRewards < rewardsSum ) revert InsufficientContractBalance();
