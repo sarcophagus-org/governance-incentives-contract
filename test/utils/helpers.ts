@@ -1,10 +1,12 @@
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber } from 'ethers';
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 export const zero = ethers.constants.Zero; 
 
 export interface Reward {
   _address: string;
   _amount: BigNumber;
+  _signer?: SignerWithAddress;
 }
 
 /**
@@ -19,8 +21,12 @@ export function sum(rewards: Reward[]): BigNumber {
     sum = sum.add(rewards[i]._amount);
   }
   return sum
- }
+}
 
+/**
+ * @notice   
+ * @param rewards  
+ */
 
 function distributeBN(length:number, value:number): BigNumber[] {
 
@@ -43,32 +49,46 @@ function distributeBN(length:number, value:number): BigNumber[] {
     }
 
   return distributeArrayBN
- }
+}
 
-const randomSigners = (amount: number): ethers.Wallet[] => {
-   let signers: ethers.Wallet[] = []
+
+/**
+ * @notice   
+ * @param rewards  
+ */
+export async function randomSigners(amount: number): Promise<SignerWithAddress[][]>  {
+   let signers = []
+
    for (let i = 0; i < amount; i++) {
-     signers.push(ethers.Wallet.createRandom())
+    let dummySigner = await ethers.getSigners()
+
+    signers.push(dummySigner)
    }
    return signers
-  }
+}
 
-export function randomRewards(numberSigners: number, totalRewardAmount: BigNumber): Reward[] {
-   let signers = randomSigners(numberSigners)
+/**
+ * @notice   
+ * @param rewards  
+ */
+export async function randomRewards(numberSigners: number, totalRewardAmount: BigNumber): Promise<Reward[]> {
+   let signers = await randomSigners(numberSigners)
    let totalRewardAmountNumber = +ethers.utils.formatEther(totalRewardAmount)
-   let amounts = distributeBN(numberSigners, totalRewardAmountNumber)
+   let randomAmounts = distributeBN(numberSigners, totalRewardAmountNumber)
  
    let votersArray: Reward[] = [];
  
    for (let i = 0; i < numberSigners; i++) {
      let voter: Reward = {} as Reward
-     voter._address = signers[i].address
-     voter._amount = amounts[i]
+     // is this correct? consol log singer
+     voter._signer = signers[0][i]
+     voter._address = signers[0][i].address
+     voter._amount = randomAmounts[i]
      votersArray.push(voter)
    }
  
    return votersArray
- }
+}
 
 
  

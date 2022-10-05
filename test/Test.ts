@@ -5,7 +5,7 @@ import { Collection } from "../typechain-types";
 import { Sarco } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from 'ethers';
-import { sum, Reward, zero, randomRewards} from "./utils/helpers"
+import { sum, Reward, zero, randomRewards, randomSigners} from "./utils/helpers"
 
 let collection: Collection;
 let sarco: Sarco;
@@ -31,12 +31,11 @@ describe("Contract: Collection", function () {
     });
 
     describe("allocateRewards()", () => {
-      context.skip("Successfully allocates rewards to voters", () => {
+      context("Successfully allocates rewards to voters", () => {
         let voterReward = ethers.utils.parseEther('10');
 
         it("should allocate rewards among 2 voters", async () => {
           let rewards: Reward[] = [{_address: voter1.address, _amount: voterReward}, {_address: voter2.address, _amount: voterReward}]
-
           await collection.connect(sarcoDao).allocateRewards(rewards)
         
           // confirm voters have increased their balance in the contract internal accounting
@@ -65,7 +64,7 @@ describe("Contract: Collection", function () {
           let claimableByVoters = await collection.claimableByVoters()
           let leftToDistribute = contractBalanceAfter.sub(claimableByVoters) 
 
-          // confirm that what is withdrawable by DAO matches excess rewards that have not been yet allocated to voters
+          // confirm unallocatedRewards matches excess rewards that have not been yet allocated to voters
           expect(await collection.unallocatedRewards()).to.equal(leftToDistribute)
         })
 
@@ -80,21 +79,23 @@ describe("Contract: Collection", function () {
       context("Successfully randomly allocates initial contract balance as rewards to 50 voters", () => {
         it("Should update internal accounting, set claimableByVoters to sum of each reward and set unallocated rewards to 0", async () => {
           let votersNumber = 50
-          let rewards = randomRewards(votersNumber, initialContractBalance)
+          let rewards = await randomRewards(votersNumber, initialContractBalance)
 
           await collection.connect(sarcoDao).allocateRewards(rewards)
 
+          // confirm voters have increased their balance in the contract internal accounting
           for (let i = 0; i < rewards.length; i++) {
             expect(await collection.balanceOf(rewards[i]._address)).to.equal(rewards[i]._amount)
           }
 
           expect(await collection.claimableByVoters()).to.equal(sum(rewards))
 
+          // confirm unallocatedRewards equals 0 as all have been allocated to voters
           expect(await collection.unallocatedRewards()).to.equal(zero)
         })
       })
 
-      context.skip("Failed setRewards", () => {
+      context("Failed setRewards", () => {
         it("should revert when function not called by owner", async () => {
           let voterReward = ethers.utils.parseEther('10');
           let rewards: Reward[] = [{_address: voter1.address, _amount: voterReward}, {_address: voter2.address, _amount: voterReward}]
@@ -113,7 +114,7 @@ describe("Contract: Collection", function () {
       })
     })
 
-    describe.skip("claim()", () => {
+    describe("claim()", () => {
       context("Successfully claim the SARCO by 2 voters", () => {
         let voterReward = ethers.utils.parseEther('10');
 
@@ -157,6 +158,27 @@ describe("Contract: Collection", function () {
         })
       })
 
+      context("Successfully claim the SARCO randomly allocated to 50 voters", () => {
+        let votersNumber = 50
+
+        it("SARCO balance of each voter should increase by their allocated reward", async () => {
+          let rewards = await randomRewards(votersNumber, initialContractBalance)
+          await collection.connect(sarcoDao).allocateRewards(rewards)
+          
+          for (let i = 0; i < rewards.length; i++) {
+            const balanceVoterBefore = await sarco.balanceOf(rewards[i]._address)
+            let signer = rewards[i]._signer as SignerWithAddress
+            rewards[i]._amount.eq(zero) ? await expect(collection.connect(signer).claim()).to.be.revertedWith('NoClaimableReward') : await collection.connect(signer).claim()
+            expect(await sarco.balanceOf(rewards[i]._address)).to.equal(balanceVoterBefore.add(rewards[i]._amount))
+            // check internal accounting clears balances of voters once rewards are claimed
+            expect(await collection.balanceOf(rewards[i]._address)).to.equal(zero)
+          }
+
+          // check internal accounting clears total claimable tokens by voters
+          expect(await collection.claimableByVoters()).to.equal(zero)
+        })
+      })
+
       context("Failed claim", () => {
         let voterReward = ethers.utils.parseEther('10');
 
@@ -171,7 +193,7 @@ describe("Contract: Collection", function () {
       })
     })
 
-    describe.skip("daoWithdraw()", () => {
+    describe("daoWithdraw()", () => {
       context("Successfully withdraw any unallocated rewards by DAO/Owner", () => {
         let voterReward = ethers.utils.parseEther('10');
 
