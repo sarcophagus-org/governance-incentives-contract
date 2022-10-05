@@ -77,16 +77,20 @@ describe("Contract: Collection", function () {
         })
       })
 
-      context("Successfully randomly allocates contract balance of 100 SARCO to 50 voters", () => {
-        let voterReward = ethers.utils.parseEther('10');
+      context("Successfully randomly allocates initial contract balance as rewards to 50 voters", () => {
+        it("Should update internal accounting, set claimableByVoters to sum of each reward and set unallocated rewards to 0", async () => {
+          let votersNumber = 50
+          let rewards = randomRewards(votersNumber, initialContractBalance)
 
-        it("Complex test", async () => {
- 
+          await collection.connect(sarcoDao).allocateRewards(rewards)
 
-          let random = randomRewards(10, initialContractBalance)
-          console.log(random)
-          console.log("Sum =",sum(random))
+          for (let i = 0; i < rewards.length; i++) {
+            expect(await collection.balanceOf(rewards[i]._address)).to.equal(rewards[i]._amount)
+          }
 
+          expect(await collection.claimableByVoters()).to.equal(sum(rewards))
+
+          expect(await collection.unallocatedRewards()).to.equal(zero)
         })
       })
 
