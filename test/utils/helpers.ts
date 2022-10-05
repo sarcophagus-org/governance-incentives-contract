@@ -24,12 +24,15 @@ export function sum(rewards: Reward[]): BigNumber {
 }
 
 /**
- * @notice   
- * @param rewards  
+ * @notice Distributes a value randomly to a given array length such that
+ * the sum adds back to that initial value 
+ * @param length array legth which we want to distribute the value to
+ * @param value value we want to distribute randomly
  */
 
 function distributeBN(length:number, value:number): BigNumber[] {
 
+  // internal function used for math computations in numbers 
   function distribute(length:number, value:number): number[] {
       if (length <= 1)
           return [value];
@@ -40,7 +43,6 @@ function distributeBN(length:number, value:number): BigNumber[] {
   }
 
   let distributeArray = distribute(length, value)
-
   let distributeArrayBN: BigNumber[] = []
   for (let i = 0; i < distributeArray.length; i++) {
     let numberWei = ethers.utils.parseEther(distributeArray[i].toString())
@@ -53,23 +55,25 @@ function distributeBN(length:number, value:number): BigNumber[] {
 
 
 /**
- * @notice   
- * @param rewards  
+ * @notice Generates a number of random ether signers  
  */
 export async function randomSigners(amount: number): Promise<SignerWithAddress[][]>  {
    let signers = []
 
    for (let i = 0; i < amount; i++) {
-    let dummySigner = await ethers.getSigners()
-
-    signers.push(dummySigner)
+    let signer = await ethers.getSigners()
+    signers.push(signer)
    }
+
    return signers
 }
 
 /**
- * @notice   
- * @param rewards  
+ * @notice Generates a random array of structs of voters' addresses and amounts to be transfered, as well as 
+ * the signer used to sign transactions
+ * @param numberSigners number of signers
+ * @param totalRewardAmount value that gets randomly distributed to each signer, such that
+ * the sum adds back to total
  */
 export async function randomRewards(numberSigners: number, totalRewardAmount: BigNumber): Promise<Reward[]> {
    let signers = await randomSigners(numberSigners)
@@ -80,8 +84,7 @@ export async function randomRewards(numberSigners: number, totalRewardAmount: Bi
  
    for (let i = 0; i < numberSigners; i++) {
      let voter: Reward = {} as Reward
-     // is this correct? consol log singer
-     voter._signer = signers[0][i]
+     voter._signer = signers[0][i] // used to sign blockchain transactions
      voter._address = signers[0][i].address
      voter._amount = randomAmounts[i]
      votersArray.push(voter)
