@@ -79,8 +79,8 @@ describe("Contract: Collection", function () {
       context("Successfully randomly allocates initial contract balance as rewards to 50 voters", () => {
         it("Should update internal accounting, set claimableByVoters to sum of each reward and set unallocated rewards to 0", async () => {
           let votersNumber = 50
+          // helper function to distribute rewards randomly among a number of voters
           let rewards = await randomRewards(votersNumber, initialContractBalance)
-
           await collection.connect(sarcoDao).allocateRewards(rewards)
 
           // confirm voters have increased their balance in the contract internal accounting
@@ -159,18 +159,24 @@ describe("Contract: Collection", function () {
       })
 
       context("Successfully claim the SARCO randomly allocated to 50 voters", () => {
-        let votersNumber = 50
-
         it("SARCO balance of each voter should increase by their allocated reward", async () => {
+          let votersNumber = 50
+          // helper function to distribute rewards randomly among a number of voters
           let rewards = await randomRewards(votersNumber, initialContractBalance)
           await collection.connect(sarcoDao).allocateRewards(rewards)
           
+          // voters claim their rewards if they have been allocated any
           for (let i = 0; i < rewards.length; i++) {
             const balanceVoterBefore = await sarco.balanceOf(rewards[i]._address)
             let signer = rewards[i]._signer as SignerWithAddress
-            rewards[i]._amount.eq(zero) ? await expect(collection.connect(signer).claim()).to.be.revertedWith('NoClaimableReward') : await collection.connect(signer).claim()
+
+            rewards[i]._amount.eq(zero) 
+            ? await expect(collection.connect(signer).claim()).to.be.revertedWith('NoClaimableReward') 
+            : await collection.connect(signer).claim()
+            
+            // check voters received their reward
             expect(await sarco.balanceOf(rewards[i]._address)).to.equal(balanceVoterBefore.add(rewards[i]._amount))
-            // check internal accounting clears balances of voters once rewards are claimed
+            // check internal accounting clears balances of voters after rewards are claimed
             expect(await collection.balanceOf(rewards[i]._address)).to.equal(zero)
           }
 
