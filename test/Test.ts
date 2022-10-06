@@ -5,7 +5,7 @@ import { Collection } from "../typechain-types";
 import { Sarco } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from 'ethers';
-import { sum, Reward, zero, randomRewards, randomSigners} from "./utils/helpers"
+import { sum, Reward, zero, randomRewards} from "./utils/helpers"
 
 let collection: Collection;
 let sarco: Sarco;
@@ -176,6 +176,9 @@ describe("Contract: Collection", function () {
 
           // check internal accounting clears total claimable tokens by voters
           expect(await collection.claimableByVoters()).to.equal(zero)
+
+          // check DAO has no unallocated rewards to withdraw
+          await expect(collection.connect(sarcoDao).daoWithdraw()).to.be.revertedWith("NoUnallocatedRewards")
         })
       })
 
