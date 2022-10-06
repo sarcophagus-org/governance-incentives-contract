@@ -92,6 +92,9 @@ describe("Contract: Collection", function () {
 
           // confirm unallocatedRewards equals 0 as all have been allocated to voters
           expect(await collection.unallocatedRewards()).to.equal(zero)
+
+          // check DAO has no unallocated rewards to withdraw
+          await expect(collection.connect(sarcoDao).daoWithdraw()).to.be.revertedWith("NoUnallocatedRewards")
         })
       })
 
@@ -159,7 +162,7 @@ describe("Contract: Collection", function () {
       })
 
       context("Successfully claim the SARCO randomly allocated to 50 voters", () => {
-        it("SARCO balance of each voter should increase by their allocated reward", async () => {
+        it("SARCO balance of each voter should increase by their allocated reward and internal accounting is adjusted", async () => {
           let votersNumber = 50
           // helper function to distribute rewards randomly among a number of voters
           let rewards = await randomRewards(votersNumber, initialContractBalance)
@@ -180,7 +183,7 @@ describe("Contract: Collection", function () {
             expect(await collection.balanceOf(rewards[i]._address)).to.equal(zero)
           }
 
-          // check internal accounting clears total claimable tokens by voters
+          // check internal accounting clears total claimable rewards
           expect(await collection.claimableByVoters()).to.equal(zero)
 
           // check DAO has no unallocated rewards to withdraw
