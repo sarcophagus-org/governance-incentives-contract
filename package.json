@@ -1,5 +1,10 @@
 {
-  "name": "hardhat-project",
+  "name": "incentive-contract",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "start": "npx hardhat node"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.1.1",
     "@nomiclabs/hardhat-etherscan": "^3.1.0",
