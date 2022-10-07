@@ -4,4 +4,3 @@ artifacts
 cache
 typechain-types
 .DS_Store
-test/.DS_Store
