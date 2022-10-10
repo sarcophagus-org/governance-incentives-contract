@@ -33,24 +33,23 @@ describe('Contract: Collection', function () {
     context('Successfully deposits SARCO to Collection contract', () => {
       let depositAmount = ethers.utils.parseEther('50');
 
-      beforeEach(async () => {});
-
-      it(' ', async () => {
+      it('Updates contract balance', async () => {
         let collectionBalanceBefore = await collection.getContractBalance();
+        await sarco.connect(tokenOwner).approve(collection.address, depositAmount);
+        await collection.connect(tokenOwner).deposit(depositAmount);
 
-        console.log('deposit complete');
-        // expect(await collection.getContractBalance()).to.equal(
-        //   collectionBalanceBefore.add(depositAmount)
-        // );
+        expect(await collection.getContractBalance()).to.equal(
+          collectionBalanceBefore.add(depositAmount)
+        );
       });
 
-      it('emit DepositRewards', async () => {
-        //expect(await  ).to.emit(depositAmount, 'DepositRewards');
-      });
+      it('Updates internal balance, considering any amounts claimable by voters', async () => {});
+
+      it('emit DepositRewards', async () => {});
     });
 
     context('Fail deposit', () => {
-      it(' ', async () => {});
+      it('should revert if sender has no SARCO', async () => {});
     });
   });
 

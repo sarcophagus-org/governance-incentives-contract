@@ -63,7 +63,7 @@ contract Collection is Ownable {
      */
     function deposit(uint depositAmount) public {
         require(token.balanceOf(msg.sender) > 0 , "SARCO balance is 0");
-        token.transfer(address(this), depositAmount);
+        token.transferFrom(msg.sender, address(this), depositAmount);
         updateInternalBalance();
         emit DepositRewards(depositAmount);
     }
