@@ -29,6 +29,31 @@ describe('Contract: Collection', function () {
     await sarco.connect(tokenOwner).transfer(collection.address, initialContractBalance);
   });
 
+  describe('deposit()', () => {
+    context('Successfully deposits SARCO to Collection contract', () => {
+      let depositAmount = ethers.utils.parseEther('50');
+
+      beforeEach(async () => {});
+
+      it(' ', async () => {
+        let collectionBalanceBefore = await collection.getContractBalance();
+
+        console.log('deposit complete');
+        // expect(await collection.getContractBalance()).to.equal(
+        //   collectionBalanceBefore.add(depositAmount)
+        // );
+      });
+
+      it('emit DepositRewards', async () => {
+        //expect(await  ).to.emit(depositAmount, 'DepositRewards');
+      });
+    });
+
+    context('Fail deposit', () => {
+      it(' ', async () => {});
+    });
+  });
+
   describe('allocateRewards()', () => {
     context('Successfully allocates rewards to voters', () => {
       let voterReward = ethers.utils.parseEther('10');
