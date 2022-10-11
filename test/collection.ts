@@ -52,9 +52,9 @@ describe('Contract: Collection', function () {
           { _address: voter2.address, _amount: voterReward },
         ];
 
-        // first rewards get allocated to voters, increasing amounts claimable by voters
+        // rewards get allocated to voters, increasing amounts claimable by voters
         await collection.connect(sarcoDao).allocateRewards(rewards);
-        // then an additional SARCO deposit takes place
+        // an additional SARCO deposit takes place
         await sarco.connect(tokenOwner).approve(collection.address, depositAmount);
         await collection.connect(tokenOwner).deposit(depositAmount);
 
@@ -247,7 +247,7 @@ describe('Contract: Collection', function () {
     });
 
     context('Successfully claim the SARCO randomly allocated to 50 voters', () => {
-      it('SARCO balance of each voter should increase by their allocated reward and internal accounting is updated', async () => {
+      it('SARCO balance of each voter should increase by their allocated reward and internal accounting gets updated', async () => {
         let votersNumber = 50;
         // helper function to distribute rewards randomly among a number of voters
         let rewards = await randomRewards(votersNumber, initialContractBalance);
