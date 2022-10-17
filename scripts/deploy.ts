@@ -1,13 +1,6 @@
 import { ethers } from 'hardhat';
 
 async function main() {
-  //   const Greeter = await ethers.getContractFactory('Greeter');
-  //   const greeter = await Greeter.deploy('Hello, Hardhat!');
-
-  //   await greeter.deployed();
-
-  //   console.log('Greeter deployed to:', greeter.address);
-
   const signers = await ethers.getSigners();
 
   const SarcoFactory = await ethers.getContractFactory('Sarco');
@@ -20,6 +13,12 @@ async function main() {
   const collection = await CollectionFactory.deploy(sarco.address);
   await collection.deployed();
   console.log('Collection contract deployed to:', collection.address);
+
+  //funding contract with SARCO
+  const initialSarcoAmount = ethers.utils.parseEther('100');
+  await sarco.connect(signers[0]).approve(collection.address, initialSarcoAmount);
+  await collection.connect(signers[0]).deposit(initialSarcoAmount);
+  console.log(await collection.getContractBalance());
 }
 
 main()
