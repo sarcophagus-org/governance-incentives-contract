@@ -25,6 +25,7 @@ contract Collection is Ownable {
         uint _amount;
     }
 
+    event DepositRewards(uint depositAmount);
     event AllocateRewards(Reward[] rewards);
     event ClaimRewards(address _address, uint claimAmount);
     event WithdrawUnallocatedRewards(address _address, uint withdrawAmount);
@@ -54,6 +55,17 @@ contract Collection is Ownable {
 
     function getContractBalance() public view returns(uint contractBalance) {
         return token.balanceOf(address(this));
+    }
+
+    /**
+     * @notice Deposit function for SARCO fees to be distributed as rewards to voters
+     * @param depositAmount amount deposited in the contract by msg.sender
+     */
+    function deposit(uint depositAmount) public {
+        require(token.balanceOf(msg.sender) > 0 , "SARCO balance is 0");
+        token.transferFrom(msg.sender, address(this), depositAmount);
+        updateInternalBalance();
+        emit DepositRewards(depositAmount);
     }
 
     /**
