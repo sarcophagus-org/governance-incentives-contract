@@ -21,8 +21,8 @@ contract Collection is Ownable {
     mapping(address => uint) public balanceOf;
 
     struct Reward {
-        address _address;
-        uint _amount;
+        address voterAddress;
+        uint rewardAmount;
     }
 
     event DepositRewards(uint depositAmount);
@@ -78,8 +78,8 @@ contract Collection is Ownable {
 
         uint rewardsSum;
         for (uint i = 0; i < rewards.length; i++) {
-            rewardsSum += rewards[i]._amount;
-            balanceOf[rewards[i]._address] += rewards[i]._amount;            
+            rewardsSum += rewards[i].rewardAmount;
+            balanceOf[rewards[i].voterAddress] += rewards[i].rewardAmount;            
         }
 
         if( unallocatedRewards < rewardsSum ) revert InsufficientContractBalance();

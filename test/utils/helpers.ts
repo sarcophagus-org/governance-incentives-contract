@@ -5,8 +5,8 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 export const zero = ethers.constants.Zero;
 
 export interface Reward {
-  _address: string;
-  _amount: BigNumber;
+  voterAddress: string;
+  rewardAmount: BigNumber;
   _signer?: SignerWithAddress;
 }
 
@@ -18,7 +18,7 @@ export interface Reward {
 export function getSum(rewards: Reward[]): BigNumber {
   let sum = zero;
   for (let i in rewards) {
-    sum = sum.add(rewards[i]._amount);
+    sum = sum.add(rewards[i].rewardAmount);
   }
   return sum;
 }
@@ -75,8 +75,8 @@ export async function randomRewards(
   for (let i = 0; i < numberOfVoters; i++) {
     let voter: Reward = {} as Reward;
     voter._signer = signers[i]; // used to sign blockchain transactions
-    voter._address = signers[i].address;
-    voter._amount = randomDistributionAmounts[i];
+    voter.voterAddress = signers[i].address;
+    voter.rewardAmount = randomDistributionAmounts[i];
     votersArray.push(voter);
   }
   return votersArray;

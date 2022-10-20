@@ -48,8 +48,8 @@ describe('Contract: Collection', function () {
 
         let voterReward = ethers.utils.parseEther('20');
         let rewards: Reward[] = [
-          { _address: voter1.address, _amount: voterReward },
-          { _address: voter2.address, _amount: voterReward },
+          { voterAddress: voter1.address, rewardAmount: voterReward },
+          { voterAddress: voter2.address, rewardAmount: voterReward },
         ];
 
         // rewards get allocated to voters, increasing amounts claimable by voters
@@ -95,8 +95,8 @@ describe('Contract: Collection', function () {
 
       beforeEach(() => {
         rewards = [
-          { _address: voter1.address, _amount: voterReward },
-          { _address: voter2.address, _amount: voterReward },
+          { voterAddress: voter1.address, rewardAmount: voterReward },
+          { voterAddress: voter2.address, rewardAmount: voterReward },
         ];
       });
 
@@ -151,7 +151,9 @@ describe('Contract: Collection', function () {
 
           // confirm voters have increased their balance in the contract internal accounting
           for (let i = 0; i < rewards.length; i++) {
-            expect(await collection.balanceOf(rewards[i]._address)).to.equal(rewards[i]._amount);
+            expect(await collection.balanceOf(rewards[i].voterAddress)).to.equal(
+              rewards[i].rewardAmount
+            );
           }
 
           expect(await collection.claimableByVoters()).to.equal(getSum(rewards));
@@ -171,8 +173,8 @@ describe('Contract: Collection', function () {
       it('should revert when function not called by owner', async () => {
         let voterReward = ethers.utils.parseEther('21');
         let rewards: Reward[] = [
-          { _address: voter1.address, _amount: voterReward },
-          { _address: voter2.address, _amount: voterReward },
+          { voterAddress: voter1.address, rewardAmount: voterReward },
+          { voterAddress: voter2.address, rewardAmount: voterReward },
         ];
 
         await expect(collection.connect(voter1).allocateRewards(rewards)).to.be.revertedWith(
@@ -185,8 +187,8 @@ describe('Contract: Collection', function () {
         // allocating initial contract balance to both voters,
         // implying it is trying to allocate twice the balance of the contract as there are 2 voters
         let rewards: Reward[] = [
-          { _address: voter1.address, _amount: voterReward },
-          { _address: voter2.address, _amount: voterReward },
+          { voterAddress: voter1.address, rewardAmount: voterReward },
+          { voterAddress: voter2.address, rewardAmount: voterReward },
         ];
 
         await expect(collection.connect(sarcoDao).allocateRewards(rewards)).to.be.revertedWith(
@@ -202,8 +204,8 @@ describe('Contract: Collection', function () {
 
       beforeEach(async () => {
         let rewards: Reward[] = [
-          { _address: voter1.address, _amount: voterReward },
-          { _address: voter2.address, _amount: voterReward },
+          { voterAddress: voter1.address, rewardAmount: voterReward },
+          { voterAddress: voter2.address, rewardAmount: voterReward },
         ];
         await collection.connect(sarcoDao).allocateRewards(rewards);
       });
@@ -255,18 +257,18 @@ describe('Contract: Collection', function () {
 
         // voters claim their rewards if they have been allocated any
         for (let i = 0; i < rewards.length; i++) {
-          const balanceVoterBefore = await sarco.balanceOf(rewards[i]._address);
+          const balanceVoterBefore = await sarco.balanceOf(rewards[i].voterAddress);
           let signer = rewards[i]._signer as SignerWithAddress;
 
-          if (!rewards[i]._amount.eq(zero)) {
+          if (!rewards[i].rewardAmount.eq(zero)) {
             await collection.connect(signer).claim();
           }
           // check voters received their reward
-          expect(await sarco.balanceOf(rewards[i]._address)).to.equal(
-            balanceVoterBefore.add(rewards[i]._amount)
+          expect(await sarco.balanceOf(rewards[i].voterAddress)).to.equal(
+            balanceVoterBefore.add(rewards[i].rewardAmount)
           );
           // check internal accounting clears balances of voters after rewards are claimed
-          expect(await collection.balanceOf(rewards[i]._address)).to.equal(zero);
+          expect(await collection.balanceOf(rewards[i].voterAddress)).to.equal(zero);
         }
 
         // check internal accounting clears total claimable rewards
@@ -283,8 +285,8 @@ describe('Contract: Collection', function () {
 
       it('should revert if voter has no rewards left to claim', async () => {
         let rewards: Reward[] = [
-          { _address: voter1.address, _amount: voterReward },
-          { _address: voter2.address, _amount: voterReward },
+          { voterAddress: voter1.address, rewardAmount: voterReward },
+          { voterAddress: voter2.address, rewardAmount: voterReward },
         ];
         await collection.connect(sarcoDao).allocateRewards(rewards);
 
@@ -301,16 +303,16 @@ describe('Contract: Collection', function () {
 
       beforeEach(async () => {
         let rewards: Reward[] = [
-          { _address: voter1.address, _amount: voterReward },
-          { _address: voter2.address, _amount: voterReward },
+          { voterAddress: voter1.address, rewardAmount: voterReward },
+          { voterAddress: voter2.address, rewardAmount: voterReward },
         ];
         await collection.connect(sarcoDao).allocateRewards(rewards);
       });
 
       it('should transfer remaining balance of the contract', async () => {
         let rewards: Reward[] = [
-          { _address: voter1.address, _amount: voterReward },
-          { _address: voter2.address, _amount: voterReward },
+          { voterAddress: voter1.address, rewardAmount: voterReward },
+          { voterAddress: voter2.address, rewardAmount: voterReward },
         ];
         const withdrawableByDao = await collection.unallocatedRewards();
         // DAO withdraws unallocated rewards
@@ -357,8 +359,8 @@ describe('Contract: Collection', function () {
 
       beforeEach(async () => {
         let rewards: Reward[] = [
-          { _address: voter1.address, _amount: voterReward },
-          { _address: voter2.address, _amount: voterReward },
+          { voterAddress: voter1.address, rewardAmount: voterReward },
+          { voterAddress: voter2.address, rewardAmount: voterReward },
         ];
         await collection.connect(sarcoDao).allocateRewards(rewards);
       });
@@ -374,8 +376,8 @@ describe('Contract: Collection', function () {
         // setting voter rewards as what can still be allocated to voters, divided by number of voters
         voterReward = toBeAllocated.div(2);
         let rewards: Reward[] = [
-          { _address: voter1.address, _amount: voterReward },
-          { _address: voter2.address, _amount: voterReward },
+          { voterAddress: voter1.address, rewardAmount: voterReward },
+          { voterAddress: voter2.address, rewardAmount: voterReward },
         ];
 
         await collection.connect(sarcoDao).allocateRewards(rewards);
