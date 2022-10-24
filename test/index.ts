@@ -13,7 +13,7 @@ function getSum(distributions: Reward[]): BigNumber {
   return sum;
 }
 
-describe('Rewards distribution script', () => {
+describe('Script: rewards distribution ', () => {
   it('Sum distributed to voters should be equal to initial amount set to distribute', async () => {
     const TOTAL_REWARDS_AMOUNT = ethers.utils.parseEther('100');
     const rewardsObject = await calculateRewardsAmounts(TOTAL_REWARDS_AMOUNT);

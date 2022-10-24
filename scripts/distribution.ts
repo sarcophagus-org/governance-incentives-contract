@@ -18,14 +18,6 @@ export async function distribution() {
 
   const scriptInput = await collection.unallocatedRewards();
   const distributionArray = await calculateRewardsAmounts(scriptInput);
-
   // allocate rewards to voters
   await collection.connect(signer).allocateRewards(distributionArray);
 }
-
-distribution()
-  .then(() => process.exit(0))
-  .catch(error => {
-    console.error(error);
-    process.exit(1);
-  });

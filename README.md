@@ -5,9 +5,9 @@
 
 ## Overview
 
-This repository contains the smart contract and scripts that allow to compute the distribution amount of a given reward to those voters that have voted in a Sarco DAO proposal, and distribute those rewards to voters.
+This repository contains the smart contract and scripts that allow to compute and allocate the rewards to voters that have participated in a Sarco DAO proposal.
 
-The rewards per voter are weighted based on their Sarco-VR holding at the time of the snapshot blocknumber.
+The rewards per voter are weighted based on the Sarco-VR holding at the time of the snapshot blocknumber.
 
 ## Prerequisites
 
@@ -31,16 +31,25 @@ Also Windows users will need to add .npmrc file with the contents script-shell=p
 
 Copy `.env.example` into `.env` in root directory and update your environment variables.
 
-In `.env` set the VOTE_ID string to the Sarco DAO vote number you want to execute the script and distribution on.
+In `.env` set the VOTE_ID string to the Sarco DAO vote number.
 
 ## Reward Distribution Script Execution
 
-In `.env` set your INFURA_API_KEY and TOTAL_REWARDS_WEI as the amount to distribute as rewards.
+In `.env` set your INFURA_API_KEY and TOTAL_REWARDS_WEI as the amount to distribute as rewards. To simulate the actual distribution, set TOTAL_REWARDS_WEI to the unallocated rewards of the Collection contract.
 
-To console.log the output of the reward distribution allocation to voters run in the terminal:
+To console.log the simulation of the reward distribution allocation based on TOTAL_REWARDS_WEI, run in the terminal:
 
 ```
 npm run start
+```
+
+## Deploy Collection Contract
+
+To deploy on the hardhat local chain, in two separate terminals run each of the following commands:
+
+```
+npm run chain
+npm run deploy
 ```
 
 ## Distribute Rewards
