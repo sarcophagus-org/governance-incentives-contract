@@ -3,6 +3,8 @@ import { BigNumber, ethers } from 'ethers';
 import Web3 from 'web3';
 import * as fs from 'fs';
 require('dotenv').config();
+import { mockVotingData, mockStakingAmount } from './mocks/mock-data';
+
 export const zero = ethers.constants.Zero;
 const ROUNDING_FACTOR = 100000;
 
@@ -38,7 +40,9 @@ async function getTotalVotersBalance(voteData: VotingData): Promise<BigNumber> {
   // Retrieve each voter balance synchronously
   const votersBalances = await Promise.all(
     voteData.addresses.map(address =>
-      stakingContract.methods.stakeValueAt(address, blockNumber).call()
+      process.env.ETHEREUM_NETWORK === 'mainnet'
+        ? stakingContract.methods.stakeValueAt(address, blockNumber).call()
+        : mockStakingAmount.get(address)
     )
   );
   // Sum the voter balances
@@ -50,7 +54,11 @@ async function getTotalVotersBalance(voteData: VotingData): Promise<BigNumber> {
 export async function calculateRewardsAmounts(
   TotalDistributionAmount: BigNumber
 ): Promise<Reward[]> {
-  const voteData = await fetchVoteData(web3, voteId);
+  const voteData =
+    process.env.ETHEREUM_NETWORK === 'mainnet'
+      ? await fetchVoteData(web3, voteId)
+      : await mockVotingData();
+
   // snapshot blockNumber of DAO proposal vote
   const blockNumber = voteData.snapshotBlockNumber;
   // fetch total amount of SarcoVR held by voters for a given voteId
@@ -61,9 +69,10 @@ export async function calculateRewardsAmounts(
   console.log('Vote ID: ', process.env.VOTE_ID);
   for (let i = 0; i < voteData.addresses.length; i++) {
     const votingAddress = voteData.addresses[i];
-    const stakedValueAt: BigNumber = await stakingContract.methods
-      .stakeValueAt(votingAddress, blockNumber)
-      .call();
+    const stakedValueAt: BigNumber =
+      process.env.ETHEREUM_NETWORK === 'mainnet'
+        ? await stakingContract.methods.stakeValueAt(votingAddress, blockNumber).call()
+        : await mockStakingAmount.get(votingAddress);
     // percentage and distributionAmount calculations include 'factor' to enable a good decimal approximation in the computation
     const factor = TotalDistributionAmount.div(ROUNDING_FACTOR);
     const percentage = BigNumber.from(stakedValueAt).mul(factor).div(totalVoteBalance);
@@ -78,7 +87,7 @@ export async function calculateRewardsAmounts(
       rewardAmount: BigNumber.from(distributionAmount),
     };
   }
-
+  console.log(rewardsObject);
   return rewardsObject;
 }
 
