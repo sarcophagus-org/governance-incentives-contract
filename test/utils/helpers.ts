@@ -75,7 +75,9 @@ export async function randomRewards(
   for (let i = 0; i < numberOfVoters; i++) {
     let voter: Reward = {} as Reward;
     voter._signer = signers[i]; // used to sign blockchain transactions
-    voter.voterAddress = signers[i].address;
+    console.log('signers[i].address: ', signers[i].address);
+    voter.voterAddress = signers[i].address.toString();
+    console.log('voter.voterAddress', voter.voterAddress);
     voter.rewardAmount = randomDistributionAmounts[i];
     votersArray.push(voter);
   }

@@ -4,3 +4,6 @@ artifacts
 cache
 typechain-types
 .DS_Store
+dist/
+build/
+.idea/
