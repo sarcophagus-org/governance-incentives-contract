@@ -87,7 +87,7 @@ export async function calculateRewardsAmounts(
       rewardAmount: BigNumber.from(distributionAmount),
     };
   }
-  console.log(rewardsObject);
+
   return rewardsObject;
 }
 

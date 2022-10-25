@@ -56,11 +56,11 @@ npm run deploy
 
 ## Distribute Rewards
 
-For mainnet in `.env` set ETHEREUM_NETWORK="mainnet" as well as your INFURA_API_KEY and TOTAL_REWARDS_WEI as the amount to distribute as rewards.
+For mainnet in `.env` set ETHEREUM_NETWORK="mainnet" as well as your INFURA_API_KEY.
 
 The script is executed on the deployed Sarco Collection Contract, so its address needs to be added in `.env` COLLECTION_CONTRACT_ADDRESS.
 
-Any unallocated rewards in the Collection Contract will be distributed as rewards to the voters of the selected VOTE_ID in `.env`.
+When on mainnet, any unallocated rewards in the Collection Contract will be distributed as rewards to the voters of the selected VOTE_ID in `.env`.
 
 For test environment set in `.env` set ETHEREUM_NETWORK to an empty string.
 
