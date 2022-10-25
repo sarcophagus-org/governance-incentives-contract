@@ -35,7 +35,7 @@ In `.env` set the VOTE_ID string to the Sarco DAO vote number.
 
 ## Reward Distribution Script Execution
 
-For mainnet in `.env` set ETHEREUM_NETWORK="mainnet" as well as your INFURA_API_KEY and TOTAL_REWARDS_WEI as the amount to distribute as rewards. To simulate the actual reward distribution, set TOTAL_REWARDS_WEI to the unallocated rewards of the Collection contract.
+For mainnet in `.env` set ETHEREUM_NETWORK="mainnet" as well as your INFURA_API_KEY and TOTAL_REWARDS_WEI as the amount to simulate rewards distribution. To simulate the actual reward distribution mechanics, set TOTAL_REWARDS_WEI to the unallocated rewards of the Collection contract.
 
 For test environment set in `.env` set ETHEREUM_NETWORK to an empty string.
 

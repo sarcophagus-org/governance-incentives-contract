@@ -24,7 +24,7 @@ describe('Script: rewards distribution ', () => {
       expect(Number(rewardsSum)).closeTo(Number(TOTAL_REWARDS_AMOUNT), 1000000);
     });
   } else {
-    it('Reward per voter should be distributed as per relative weight of Sarco-VR balance', async () => {
+    it('Reward per voter should be distributed as per relative weight of their Sarco-VR balance', async () => {
       const TOTAL_REWARDS_AMOUNT = ethers.utils.parseEther('100');
       const rewardsObject = await calculateRewardsAmounts(TOTAL_REWARDS_AMOUNT);
       const rewardsSum = getSum(rewardsObject);
