@@ -35,7 +35,9 @@ In `.env` set the VOTE_ID string to the Sarco DAO vote number.
 
 ## Reward Distribution Script Execution
 
-In `.env` set your INFURA_API_KEY and TOTAL_REWARDS_WEI as the amount to distribute as rewards. To simulate the actual distribution, set TOTAL_REWARDS_WEI to the unallocated rewards of the Collection contract.
+For mainnet in `.env` set ETHEREUM_NETWORK="mainnet" as well as your INFURA_API_KEY and TOTAL_REWARDS_WEI as the amount to distribute as rewards. To simulate the actual reward distribution, set TOTAL_REWARDS_WEI to the unallocated rewards of the Collection contract.
+
+For test environment set in `.env` set ETHEREUM_NETWORK to an empty string.
 
 To console.log the simulation of the reward distribution allocation based on TOTAL_REWARDS_WEI, run in the terminal:
 
@@ -54,17 +56,23 @@ npm run deploy
 
 ## Distribute Rewards
 
+For mainnet in `.env` set ETHEREUM_NETWORK="mainnet" as well as your INFURA_API_KEY and TOTAL_REWARDS_WEI as the amount to distribute as rewards.
+
 The script is executed on the deployed Sarco Collection Contract, so its address needs to be added in `.env` COLLECTION_CONTRACT_ADDRESS.
 
 Any unallocated rewards in the Collection Contract will be distributed as rewards to the voters of the selected VOTE_ID in `.env`.
 
-To distribute any unallocated rewards from the Collection Contract run:
+For test environment set in `.env` set ETHEREUM_NETWORK to an empty string.
+
+To conole log the allocation in the terminal run:
 
 ```
 npm run distribution
 ```
 
 ## Execute Test
+
+For testing with mock data set in `.env` ETHEREUM_NETWORK to an empty string, then run:
 
 ```
 npm run test

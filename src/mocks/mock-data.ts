@@ -7,11 +7,12 @@ export interface Staking {
   stakingAmount: BigNumber;
 }
 
+// Mock addressess and blocknumbers
 export async function mockVotingData() {
   const voteDataObject: VotingData = {
     addresses: [
-      '0x19fd3927ffe5f49c19e0c722290adba674bf52a3',
-      '0x244265a76901b8030b140a2996e6dd4703cbf20f',
+      '0x0000000000000000000000000000000000000001',
+      '0x0000000000000000000000000000000000000002',
     ],
     executedBlockNumber: 1655495417,
     snapshotBlockNumber: 14968124,
@@ -19,13 +20,14 @@ export async function mockVotingData() {
   return voteDataObject;
 }
 
+// Sarco-Vr balance of the mock voters
 export const mockStakingAmount: Map<string, BigNumber> = new Map();
 mockStakingAmount.set(
-  '0x19fd3927ffe5f49c19e0c722290adba674bf52a3',
+  '0x0000000000000000000000000000000000000001',
   BigNumber.from(ethers.utils.parseEther('4'))
 );
 mockStakingAmount.set(
-  '0x244265a76901b8030b140a2996e6dd4703cbf20f',
+  '0x0000000000000000000000000000000000000002',
   BigNumber.from(ethers.utils.parseEther('12'))
 );
 
