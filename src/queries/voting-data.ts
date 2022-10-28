@@ -1,8 +1,8 @@
 import { connect } from '@aragon/connect';
 import connectVoting, { Voting } from '@aragon/connect-voting';
 import Web3 from 'web3';
-
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 export interface VotingData {
   addresses: string[];

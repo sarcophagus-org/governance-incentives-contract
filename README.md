@@ -64,7 +64,7 @@ When on mainnet, any unallocated rewards in the Collection Contract will be dist
 
 For test environment set in `.env` set ETHEREUM_NETWORK to an empty string.
 
-To conole log the allocation in the terminal run:
+To console log the allocation in the terminal run:
 
 ```
 npm run distribution

@@ -2,8 +2,8 @@ import type { Collection } from '../typechain-types/contracts/Collection';
 import { Collection__factory } from '../typechain-types/factories/contracts/Collection__factory';
 import { calculateRewardsAmounts } from '../src/index';
 import hre from 'hardhat';
-
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 export async function distribution() {
   console.log('collection contract address:', process.env.COLLECTION_CONTRACT_ADDRESS);

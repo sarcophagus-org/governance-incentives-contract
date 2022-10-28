@@ -2,7 +2,8 @@ import { fetchVoteData, VotingData } from './queries/voting-data';
 import { BigNumber, ethers } from 'ethers';
 import Web3 from 'web3';
 import * as fs from 'fs';
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 import { mockVotingData, mockStakingAmount } from './mocks/mock-data';
 
 export const zero = ethers.constants.Zero;
