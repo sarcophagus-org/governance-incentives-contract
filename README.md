@@ -31,15 +31,15 @@ Also Windows users will need to add .npmrc file with the contents script-shell=p
 
 Copy `.env.example` into `.env` in root directory and update your environment variables as follows.
 
-## MOCK DATA
+# MOCK DATA
 
 THIS WILL RUN THE DISTRIBUTION SCRIPT USING MOCK DATA.
 
-# Environment Variables
+## Environment Variables
 
 For testing with mock data set in `.env` ETHEREUM_NETWORK to an empty string, VOTE_ID to any number cast as a string (ex "21"), and TOTAL_REWARDS_WEI as the total amount of rewards to be distributed to voters.
 
-# Distribution Script
+## Distribution Script
 
 To console.log the mock reward distribution allocation run in the terminal:
 
@@ -47,7 +47,7 @@ To console.log the mock reward distribution allocation run in the terminal:
 npm run start
 ```
 
-# Tests
+## Tests
 
 For complete testing:
 
@@ -55,15 +55,15 @@ For complete testing:
 npm run test
 ```
 
-## LOCAL ENVIRONMENT
+# LOCAL ENVIRONMENT
 
 THIS WILL DEPLOY THE COLLECTION CONTRACT LOCALLY ON HARDHAT AND RUN THE SCRIPTS USING REAL WORLD INPUT DATA SUCH AS VOTER ADDRESSES AND THEIR SARCO VR HOLDING AT THE TIME OF VOTING.
 
-# Environment Variables
+## Environment Variables
 
 In the `.env` file set the ETHEREUM_NETWORK to "mainnet", VOTE_ID to the Sarco DAO vote number (ex "21"), set your INFURA_API_KEY, and set TOTAL_REWARDS_WEI as the total amount to be distributed to voters.
 
-# Local deploy commands
+## Local deploy commands
 
 To deploy the Collection Contract on the hardhat local chain and fund it with 100 SARCO, in two separate terminals run each of the following commands:
 
@@ -72,9 +72,9 @@ npm run chain
 npm run deploy
 ```
 
-This command will console log the Collection Contract address deployed locally. Add this contract address in the `.env` file under COLLECTION_CONTRACT_ADDRESS.
+This last command will console log the Collection Contract address deployed locally. Add this contract address in the `.env` file under COLLECTION_CONTRACT_ADDRESS.
 
-# Distribution Script
+## Distribution Script
 
 To console.log the preview of the reward distribution allocation based on TOTAL_REWARDS_WEI run in the terminal:
 
@@ -90,17 +90,17 @@ At the time of this writing, the total unallocated rewards in the Collection Con
 npm run distribution
 ```
 
-## TESTNET AND MAINNET ENVIRONMENT
+# TESTNET AND MAINNET ENVIRONMENT
 
 THIS WILL DISTRIBUTE REWARDS TO VOTERS USING REAL WORLD INPUT DATA AND THE COLLECTION CONTRACT ALREADY DEPLOYED ON TESTNET OR MAINNET.
 
-# Environment Variables
+## Environment Variables
 
 In addition to the variables used in the local environment, once the Collection Contract is deployed on the chain of choice, update its address in COLLECTION_CONTRACT_ADDRESS.
 
 Also include MAINNET_DEPLOYER_PRIVATE_KEY or GOERLI_DEPLOYER_PRIVATE_KEY and GOERLI_PROVIDER based on the chain where the Collection Contract has been deployed.
 
-# Preview Distribution Results
+## Preview Distribution Results
 
 At the time of this writing, the total unallocated rewards in the Collection Contract will be distributed to voters when the distribution script is executed. To preview the distribution results prior to executing the distribution, set in the .env file TOTAL_REWARDS_WEI to the unallocated rewards of the Collection contract, then run:
 
