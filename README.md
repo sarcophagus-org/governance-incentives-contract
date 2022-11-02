@@ -90,6 +90,16 @@ At the time of this writing, the total unallocated rewards in the Collection Con
 npm run distribution
 ```
 
+## Tests
+
+To run the smart contract tests, run run:
+
+```
+npm run test
+```
+
+Note that the distribution test with mock data will not run when ETHEREUM_NETWORK is set to mainnet.
+
 # TESTNET AND MAINNET ENVIRONMENT
 
 DISTRIBUTE REWARDS TO VOTERS USING REAL WORLD INPUT DATA AND THE COLLECTION CONTRACT ALREADY DEPLOYED ON TESTNET OR MAINNET.
