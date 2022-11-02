@@ -1,4 +1,4 @@
-# Voting incentive rewards distribution contract and script
+# Collection Contract and Voting Rewards Distribution Script
 
 [![Discord](https://img.shields.io/discord/753398645507883099?color=768AD4&label=discord)](https://discord.com/channels/753398645507883099/)
 [![Twitter](https://img.shields.io/twitter/follow/sarcophagusio?style=social)](https://twitter.com/sarcophagusio)
@@ -33,7 +33,7 @@ Copy `.env.example` into `.env` in root directory and update your environment va
 
 # MOCK DATA
 
-THIS WILL RUN THE DISTRIBUTION SCRIPT USING MOCK DATA.
+RUNS THE DISTRIBUTION SCRIPT USING MOCK DATA.
 
 ## Environment Variables
 
@@ -57,7 +57,7 @@ npm run test
 
 # LOCAL ENVIRONMENT
 
-THIS WILL DEPLOY THE COLLECTION CONTRACT LOCALLY ON HARDHAT AND RUN THE SCRIPTS USING REAL WORLD INPUT DATA SUCH AS VOTER ADDRESSES AND THEIR SARCO VR HOLDING AT THE TIME OF VOTING.
+DEPLOYS THE COLLECTION CONTRACT LOCALLY ON HARDHAT AND RUNS THE SCRIPTS USING REAL WORLD INPUT DATA SUCH AS VOTER ADDRESSES AND THEIR SARCO VR HOLDING AT THE TIME OF VOTING.
 
 ## Environment Variables
 
@@ -72,7 +72,7 @@ npm run chain
 npm run deploy
 ```
 
-This last command will console log the Collection Contract address deployed locally. Add this contract address in the `.env` file under COLLECTION_CONTRACT_ADDRESS.
+This last command will console log the Collection Contract address deployed locally. Add this address in the `.env` on COLLECTION_CONTRACT_ADDRESS.
 
 ## Distribution Script
 
@@ -84,7 +84,7 @@ npm run start
 
 ## Distribute Rewards
 
-At the time of this writing, the total unallocated rewards in the Collection Contract will be distributed to voters when the distribution script is executed. To execute the reward distribution on the locally deployed Collections Contract run:
+At the time of this writing, the total unallocated rewards in the Collection Contract will be distributed to voters when the distribution script is executed. To execute the reward distribution on the locally deployed Collection Contract run:
 
 ```
 npm run distribution
@@ -92,11 +92,11 @@ npm run distribution
 
 # TESTNET AND MAINNET ENVIRONMENT
 
-THIS WILL DISTRIBUTE REWARDS TO VOTERS USING REAL WORLD INPUT DATA AND THE COLLECTION CONTRACT ALREADY DEPLOYED ON TESTNET OR MAINNET.
+DISTRIBUTE REWARDS TO VOTERS USING REAL WORLD INPUT DATA AND THE COLLECTION CONTRACT ALREADY DEPLOYED ON TESTNET OR MAINNET.
 
 ## Environment Variables
 
-In addition to the variables used in the local environment, once the Collection Contract is deployed on the chain of choice, update its address in COLLECTION_CONTRACT_ADDRESS.
+In addition to the variables included in the local environment above, once the Collection Contract is deployed on the chain of choice, update its address in COLLECTION_CONTRACT_ADDRESS.
 
 Also include MAINNET_DEPLOYER_PRIVATE_KEY or GOERLI_DEPLOYER_PRIVATE_KEY and GOERLI_PROVIDER based on the chain where the Collection Contract has been deployed.
 
@@ -110,7 +110,7 @@ npm run start
 
 ## Distribute Rewards
 
-To allocate all unallocated rewards held in the Collection Contract to voters, run:
+To distribute all unallocated rewards held in the Collection Contract to voters, run:
 
 ```
 npm run distribution
