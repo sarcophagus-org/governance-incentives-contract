@@ -1,8 +1,8 @@
 import { connect } from '@aragon/connect';
 import connectVoting, { Voting } from '@aragon/connect-voting';
 import Web3 from 'web3';
-
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 export interface VotingData {
   addresses: string[];
@@ -11,7 +11,7 @@ export interface VotingData {
 }
 
 const aragonEnv = {
-  network: parseInt(process.env.CHAIN_ID!, 10),
+  network: parseInt(process.env.CHAIN_ID ?? '1', 10),
   location: process.env.ORGANIZATION ?? 'sarcophagus.aragonid.eth',
 };
 

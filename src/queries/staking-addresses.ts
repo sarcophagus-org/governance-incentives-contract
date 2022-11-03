@@ -23,4 +23,5 @@ export async function stakingAddresses() {
   return onStakeAddresses;
 }
 
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();

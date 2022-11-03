@@ -2,6 +2,9 @@ import { expect } from 'chai';
 import { calculateRewardsAmounts, zero, Reward } from '../src/index';
 import { describe } from 'mocha';
 import { BigNumber, ethers } from 'ethers';
+import { mockStakingAmount, totalStakingAmount } from '../src/mocks/mock-data';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // helper function that sums the BN values of the array of objects Rewards
 function getSum(distributions: Reward[]): BigNumber {
@@ -14,11 +17,20 @@ function getSum(distributions: Reward[]): BigNumber {
 }
 
 describe('Script: rewards distribution ', () => {
-  it('Sum distributed to voters should be equal to initial amount set to distribute', async () => {
-    const TOTAL_REWARDS_AMOUNT = ethers.utils.parseEther('100');
-    const rewardsObject = await calculateRewardsAmounts(TOTAL_REWARDS_AMOUNT);
-    const rewardsSum = getSum(rewardsObject);
+  if (process.env.ETHEREUM_NETWORK != 'mainnet') {
+    it('Reward per voter should be distributed as per relative weight of their Sarco-VR balance', async () => {
+      const TOTAL_REWARDS_AMOUNT = ethers.utils.parseEther('100');
+      const rewardsObject = await calculateRewardsAmounts(TOTAL_REWARDS_AMOUNT);
+      const rewardsSum = getSum(rewardsObject);
 
-    expect(Number(rewardsSum)).closeTo(Number(TOTAL_REWARDS_AMOUNT), 1000000);
-  });
+      for (let i = 0; i < rewardsObject.length; i++) {
+        let rewardWeight = rewardsObject[i].rewardAmount.div(rewardsSum);
+        let sarcoBalanceWeight = mockStakingAmount
+          .get(rewardsObject[i].voterAddress)
+          ?.div(totalStakingAmount);
+
+        expect(rewardWeight).to.equal(sarcoBalanceWeight);
+      }
+    });
+  }
 });
